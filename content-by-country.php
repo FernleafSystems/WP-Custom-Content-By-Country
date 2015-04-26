@@ -3,13 +3,13 @@
 Plugin Name: Custom Content by Country (from iControlWP)
 Plugin URI: http://icwp.io/4p
 Description: Tool for displaying/hiding custom content based on visitors country/location.
-Version: 2.16.140816-1
+Version: 2.17.150218
 Author: iControlWP
 Author URI: http://icwp.io/home
 */
 
 /**
- * Copyright (c) 2014 iControlWP <support@icontrolwp.com>
+ * Copyright (c) 2015 iControlWP <support@icontrolwp.com>
  * All rights reserved.
  *
  * "Custom Content by Country" is
