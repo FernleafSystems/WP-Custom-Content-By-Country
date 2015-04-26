@@ -32,7 +32,7 @@ Author URI: http://icwp.io/home
 require_once( dirname(__FILE__).'/src/icwp-base.php' );
 class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 
-	const Ip2NationDbVersion = '20140816D';
+	const Ip2NationDbVersion = '20150218A';
 
 	const Ip2NationDbVersionKey = 'ip2nation_version';
 
