@@ -1,5 +1,5 @@
 === Custom Content by Country (by iControlWP) ===
-Contributors: paultgoodchild, dlgoodchild
+Contributors: paultgoodchild
 Donate link: http://icwp.io/q
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
