@@ -208,9 +208,7 @@ class ICWP_Plugins_Base_CBC {
 	 * The callback function for the main admin menu index page
 	 */
 	public function onDisplayMainMenu() {
-		$aData = array(
-				'plugin_url'	=> $this->sPluginUrl
-		);
+		$aData = array( 'plugin_url' => $this->sPluginUrl );
 		$this->display( 'worpit_'.$this->oPluginVo->getPluginSlug().'_index', $aData );
 	}
 
@@ -278,7 +276,7 @@ class ICWP_Plugins_Base_CBC {
 		} else {
 			return $sFullNotice;
 		}
-	}//getAdminNotice
+	}
 
 	protected function redirect( $insUrl, $innTimeout = 1 ) {
 		echo '
@@ -327,10 +325,10 @@ class ICWP_Plugins_Base_CBC {
 
 	/**
 	 * Reads the current value for each plugin option in an options section from the WP options db.
-	 *
 	 * Called from within on admin_init
-	 * 
 	 * NOT automatically executed on any hooks.
+	 *
+	 * @param array $inaOptionsSection
 	 */
 	protected function populatePluginOptionsSection( &$inaOptionsSection ) {
 
@@ -344,15 +342,16 @@ class ICWP_Plugins_Base_CBC {
 			$sCurrentOptionVal = $this->getOption( $sOptionKey );
 			$aOptionParams[1] = ($sCurrentOptionVal == '' )? $sOptionDefault : $sCurrentOptionVal;
 		}
-	}//populatePluginOptionsSection
+	}
 
 	/**
-	 * $sAllOptionsInput is a comma separated list of all the input keys to be processed from the $_POST
+	 * @param $sAllOptionsInput a comma separated list of all the input keys to be processed from the $_POST
+	 * @return bool
 	 */
 	protected function updatePluginOptionsFromSubmit( $sAllOptionsInput ) {
 
 		if ( empty($sAllOptionsInput) ) {
-			return;
+			return true;
 		}
 
 		$aAllInputOptions = explode( ',', $sAllOptionsInput);
@@ -372,9 +371,8 @@ class ICWP_Plugins_Base_CBC {
 			}
 			$this->updateOption( $sOptionKey, $sOptionValue );
 		}
-		
 		return true;
-	}//updatePluginOptionsFromSubmit
+	}
 	
 	protected function collateAllFormInputsForAllOptions($aAllOptions, $sInputSeparator = ',') {
 
@@ -398,8 +396,9 @@ class ICWP_Plugins_Base_CBC {
 
 	/**
 	 * Returns a comma seperated list of all the options in a given options section.
-	 *
-	 * @param array $aOptionsSection
+	 * @param $aOptionsSection
+	 * @param string $sInputSeparator
+	 * @return string
 	 */
 	protected function collateAllFormInputsForOptionsSection( $aOptionsSection, $sInputSeparator = ',' ) {
 
@@ -479,18 +478,19 @@ class ICWP_Plugins_Base_CBC {
 
 	/**
 	 * @param $sOptionName
-	 * @param $insValue
+	 * @param $sValue
 	 * @return bool
 	 */
-	public function updateOption( $sOptionName, $insValue ) {
-		if ( $this->getOption( $sOptionName ) == $insValue ) {
+	public function updateOption( $sOptionName, $sValue ) {
+		if ( $this->getOption( $sOptionName ) == $sValue ) {
 			return true;
 		}
-		$fResult = ICWP_WpFunctions_CBC::UpdateWpOption( $this->getOptionKey( $sOptionName ), $insValue );
+		$fResult = ICWP_WpFunctions_CBC::UpdateWpOption( $this->getOptionKey( $sOptionName ), $sValue );
 		if ( !$fResult ) {
 			$this->m_fUpdateSuccessTracker = false;
 			$this->m_aFailedUpdateOptions[] = $this->getOptionKey( $sOptionName );
 		}
+		return true;
 	}
 
 	/**

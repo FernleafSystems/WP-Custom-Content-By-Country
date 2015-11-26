@@ -1,10 +1,8 @@
 <?php
 /**
- * Copyright (c) 2013 iControlWP <support@icontrolwp.com>
+ * Copyright (c) 2015 iControlWP <support@icontrolwp.com>
  * All rights reserved.
  * 
- * Version: 2013-08-14_A
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -24,21 +22,21 @@ class ICWP_WpFunctions_CBC {
 	/**
 	 * @var string
 	 */
-	protected $m_sWpVersion;
+	protected $sWpVersion;
 	
 	public function __construct() {}
 
 	/**
-	 * @param string $insPluginFile
-	 * @return boolean|stdClass
+	 * @param string $sPluginFile
+	 * @return false|stdClass
 	 */
-	public function getIsPluginUpdateAvailable( $insPluginFile ) {
+	public function getIsPluginUpdateAvailable( $sPluginFile ) {
 		$aUpdates = $this->getWordpressUpdates();
 		if ( empty( $aUpdates ) ) {
 			return false;
 		}
-		if ( isset( $aUpdates[ $insPluginFile ] ) ) {
-			return $aUpdates[ $insPluginFile ];
+		if ( isset( $aUpdates[ $sPluginFile ] ) ) {
+			return $aUpdates[ $sPluginFile ];
 		}
 		return false;
 	}
@@ -103,15 +101,15 @@ class ICWP_WpFunctions_CBC {
 	public function getWordPressVersion() {
 		global $wp_version;
 		
-		if ( empty( $this->m_sWpVersion ) ) {
+		if ( empty( $this->sWpVersion ) ) {
 			$sVersionFile = ABSPATH.WPINC.'/version.php';
 			$sVersionContents = file_get_contents( $sVersionFile );
 			
 			if ( preg_match( '/wp_version\s=\s\'([^(\'|")]+)\'/i', $sVersionContents, $aMatches ) ) {
-				$this->m_sWpVersion = $aMatches[1];
+				$this->sWpVersion = $aMatches[1];
 			}
 		}
-		return $this->m_sWpVersion;
+		return $this->sWpVersion;
 	}
 
 	public static function GetWpOption( $sKey, $mDefault = false ) {
