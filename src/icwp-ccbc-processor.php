@@ -377,7 +377,9 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	}
 
 	/**
-	 * Takes an array, an array key, and a default value. If key isn't set, sets it to default.
+	 * @param $aSrc
+	 * @param $insKey
+	 * @param string $insValue
 	 */
 	protected function def( &$aSrc, $insKey, $insValue = '' ) {
 		if ( !isset( $aSrc[$insKey] ) ) {

@@ -253,7 +253,7 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 		}
 
 		foreach ($aQueries as $to_run) {
-			$mResult = $wpdb->query($to_run);
+			$wpdb->query($to_run);
 		}
 		return true;
 	}

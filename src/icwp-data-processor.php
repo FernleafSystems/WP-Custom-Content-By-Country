@@ -17,19 +17,14 @@
  *
  */
 
-if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
+if ( !class_exists( 'ICWP_CCBC_DataProcessor', false ) ):
 
-	class ICWP_CCBC_DataProcessor_V3 {
+	class ICWP_CCBC_DataProcessor {
 
 		/**
-		 * @var ICWP_CCBC_DataProcessor_V3
+		 * @var ICWP_CCBC_DataProcessor
 		 */
 		protected static $oInstance = NULL;
-
-		/**
-		 * @var bool
-		 */
-		public static $fUseFilterInput = false;
 
 		/**
 		 * @var string
@@ -40,6 +35,16 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * @var integer
 		 */
 		protected static $nRequestTime;
+
+		/**
+		 * @return ICWP_CCBC_DataProcessor
+		 */
+		public static function GetInstance() {
+			if ( is_null( self::$oInstance ) ) {
+				self::$oInstance = new self();
+			}
+			return self::$oInstance;
+		}
 
 		/**
 		 * @return int
@@ -65,10 +70,13 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 
 			$aAddressSourceOptions = array(
 				'HTTP_CF_CONNECTING_IP',
-				'HTTP_CLIENT_IP',
 				'HTTP_X_FORWARDED_FOR',
 				'HTTP_X_FORWARDED',
+				'HTTP_X_REAL_IP',
+				'HTTP_X_SUCURI_CLIENTIP',
+				'HTTP_INCAP_CLIENT_IP',
 				'HTTP_FORWARDED',
+				'HTTP_CLIENT_IP',
 				'REMOTE_ADDR'
 			);
 			$fCanUseFilter = function_exists( 'filter_var' ) && defined( 'FILTER_FLAG_NO_PRIV_RANGE' ) && defined( 'FILTER_FLAG_IPV4' );
@@ -100,7 +108,6 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 
 		/**
 		 * For now will return true when it's a valid IPv4 or IPv6 address and you have access to filter_var()
-		 *
 		 * otherwise, if it's Ipv6 it'll return false always or will attempt to manually parse IPv4.
 		 *
 		 * @param string
@@ -144,7 +151,7 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 
 		/**
 		 * @param string $sAddresses
-		 * @return Ambigous|array|unknown
+		 * @return array
 		 */
 		static public function ExtractIpAddresses( $sAddresses = '' ) {
 
@@ -217,38 +224,38 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * Given a list of new IPv4 address ($inaNewRawAddresses) it'll add them to the existing list
 		 * ($inaCurrent) where they're not already found
 		 *
-		 * @param array $inaCurrent			- the list to which to add the new addresses
-		 * @param array $inaNewRawAddresses	- the new IPv4 addresses
+		 * @param array $aCurrent			- the list to which to add the new addresses
+		 * @param array $aNewRawAddresses	- the new IPv4 addresses
 		 * @param int $outnNewAdded			- the count of newly added IPs
-		 * @return unknown|Ambigous <multitype:multitype: , string>
+		 * @return array
 		 */
-		public static function Add_New_Raw_Ips( $inaCurrent, $inaNewRawAddresses, &$outnNewAdded = 0 ) {
+		public static function Add_New_Raw_Ips( $aCurrent, $aNewRawAddresses, &$outnNewAdded = 0 ) {
 
 			$outnNewAdded = 0;
 
-			if ( empty( $inaNewRawAddresses ) ) {
-				return $inaCurrent;
+			if ( empty( $aNewRawAddresses ) ) {
+				return $aCurrent;
 			}
 
-			if ( !array_key_exists( 'ips', $inaCurrent ) ) {
-				$inaCurrent['ips'] = array();
+			if ( !array_key_exists( 'ips', $aCurrent ) ) {
+				$aCurrent['ips'] = array();
 			}
-			if ( !array_key_exists( 'meta', $inaCurrent ) ) {
-				$inaCurrent['meta'] = array();
+			if ( !array_key_exists( 'meta', $aCurrent ) ) {
+				$aCurrent['meta'] = array();
 			}
 
-			foreach( $inaNewRawAddresses as $sRawIpAddress => $sLabel ) {
+			foreach( $aNewRawAddresses as $sRawIpAddress => $sLabel ) {
 				$mVerifiedIp = self::Verify_Ip( $sRawIpAddress );
-				if ( $mVerifiedIp !== false && !in_array( $mVerifiedIp, $inaCurrent['ips'] ) ) {
-					$inaCurrent['ips'][] = $mVerifiedIp;
+				if ( $mVerifiedIp !== false && !in_array( $mVerifiedIp, $aCurrent['ips'] ) ) {
+					$aCurrent['ips'][] = $mVerifiedIp;
 					if ( empty($sLabel) ) {
 						$sLabel = 'no label';
 					}
-					$inaCurrent['meta'][ md5( $mVerifiedIp ) ] = $sLabel;
+					$aCurrent['meta'][ md5( $mVerifiedIp ) ] = $sLabel;
 					$outnNewAdded++;
 				}
 			}
-			return $inaCurrent;
+			return $aCurrent;
 		}
 
 		/**
@@ -442,13 +449,6 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		}
 
 		/**
-		 * @return bool
-		 */
-		static public function GetUseFilterInput() {
-			return self::$fUseFilterInput && function_exists( 'filter_input' );
-		}
-
-		/**
 		 * @param array $aArray
 		 * @param string $sKey		The array key to fetch
 		 * @param mixed $mDefault
@@ -467,12 +467,6 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * @return mixed|null
 		 */
 		public static function FetchCookie( $sKey, $mDefault = null ) {
-			if ( self::GetUseFilterInput() && defined( 'INPUT_COOKIE' ) ) {
-				$mPossible = filter_input( INPUT_COOKIE, $sKey );
-				if ( !empty( $mPossible ) ) {
-					return $mPossible;
-				}
-			}
 			return self::ArrayFetch( $_COOKIE, $sKey, $mDefault );
 		}
 
@@ -482,12 +476,6 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * @return mixed|null
 		 */
 		public static function FetchEnv( $sKey, $mDefault = null ) {
-			if ( self::GetUseFilterInput() && defined( 'INPUT_ENV' ) ) {
-				$sPossible = filter_input( INPUT_ENV, $sKey );
-				if ( !empty( $sPossible ) ) {
-					return $sPossible;
-				}
-			}
 			return self::ArrayFetch( $_ENV, $sKey, $mDefault );
 		}
 		/**
@@ -496,12 +484,6 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * @return mixed|null
 		 */
 		public static function FetchGet( $sKey, $mDefault = null ) {
-			if ( self::GetUseFilterInput() && defined( 'INPUT_GET' ) ) {
-				$mPossible = filter_input( INPUT_GET, $sKey );
-				if ( !empty( $mPossible ) ) {
-					return $mPossible;
-				}
-			}
 			return self::ArrayFetch( $_GET, $sKey, $mDefault );
 		}
 		/**
@@ -510,12 +492,6 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * @return mixed|null
 		 */
 		public static function FetchPost( $sKey, $mDefault = null ) {
-			if ( self::GetUseFilterInput() && defined( 'INPUT_POST' ) ) {
-				$mPossible = filter_input( INPUT_POST, $sKey );
-				if ( !empty( $mPossible ) ) {
-					return $mPossible;
-				}
-			}
 			return self::ArrayFetch( $_POST, $sKey, $mDefault );
 		}
 		/**
@@ -541,28 +517,7 @@ if ( !class_exists('ICWP_CCBC_DataProcessor_V3') ):
 		 * @return mixed|null
 		 */
 		public static function FetchServer( $sKey, $mDefault = null ) {
-			if ( self::GetUseFilterInput() && defined( 'INPUT_SERVER' ) ) {
-				$sPossible = filter_input( INPUT_SERVER, $sKey );
-				if ( !empty( $sPossible ) ) {
-					return $sPossible;
-				}
-			}
 			return self::ArrayFetch( $_SERVER, $sKey, $mDefault );
-		}
-	}
-endif;
-
-if ( !class_exists('ICWP_CCBC_DataProcessor') ):
-
-	class ICWP_CCBC_DataProcessor extends ICWP_CCBC_DataProcessor_V3 {
-		/**
-		 * @return ICWP_CCBC_DataProcessor
-		 */
-		public static function GetInstance() {
-			if ( is_null( self::$oInstance ) ) {
-				self::$oInstance = new self();
-			}
-			return self::$oInstance;
 		}
 	}
 endif;
