@@ -3,8 +3,8 @@ Contributors: paultgoodchild
 Donate link: http://icwp.io/q
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 4.3
-Stable tag: 2.17.150725-0
+Tested up to: 4.4
+Stable tag: 2.17.150725-1
 
 == Description ==
 
@@ -140,6 +140,11 @@ ip2nationCountries
 = TODO =
 
 * Add option to remove the ip2nations data from the database.
+
+= 2.17.150725-1 =
+*released 10th, August 2015*
+
+* UPDATED:  Support WordPress v4.4
 
 = 2.17.150725-0 =
 *released 10th, August 2015*
