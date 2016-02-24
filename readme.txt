@@ -4,7 +4,7 @@ Donate link: http://icwp.io/q
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
 Tested up to: 4.4
-Stable tag: 2.17.150725-1
+Stable tag: 2.17.160222
 
 == Description ==
 
