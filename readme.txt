@@ -3,12 +3,12 @@ Contributors: paultgoodchild
 Donate link: http://icwp.io/q
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 4.4
-Stable tag: 2.17.160222
+Tested up to: 4.5
+Stable tag: 2.17.160222-1
 
 == Description ==
 
-Custom Content by Country WordPress plugin from [iControlWP](http://icwp.io/5z "iControlWP: Manage Multiple WordPress Sites Better")
+Custom Content by Country from [Multiple WordPress Security Manager](http://icwp.io/5z "iControlWP: Multiple WordPress Security Manager")
 offers you the option to show/hide content to users based on their location (where provided).
 
 With a simple shortcode you can specify, using a list of country codes whether to
