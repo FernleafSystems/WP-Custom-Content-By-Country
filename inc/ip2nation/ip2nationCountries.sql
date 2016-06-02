@@ -1,5 +1,5 @@
 DROP TABLE IF EXISTS ip2nationCountries;
-      
+
 CREATE TABLE ip2nationCountries (
   code varchar(4) NOT NULL default '',
   iso_code_2 varchar(2) NOT NULL default '',
@@ -7,7 +7,7 @@ CREATE TABLE ip2nationCountries (
   iso_country varchar(255) NOT NULL default '',
   country varchar(255) NOT NULL default '',
   lat float NOT NULL default '0',
-  lon float NOT NULL default '0',  
+  lon float NOT NULL default '0',
   PRIMARY KEY  (code),
   KEY code (code)
 );
