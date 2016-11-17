@@ -478,16 +478,16 @@ if ( !class_exists( 'ICWP_CCBC_DataProcessor', false ) ):
 			return self::ArrayFetch( $_POST, $sKey, $mDefault );
 		}
 		/**
-		 * @param string $sKey
-		 * @param boolean $infIncludeCookie
-		 * @param mixed $mDefault
+		 * @param string  $sKey
+		 * @param boolean $bIncludeCookie
+		 * @param mixed   $mDefault
 		 * @return mixed|null
 		 */
-		public static function FetchRequest( $sKey, $infIncludeCookie = true, $mDefault = null ) {
+		public static function FetchRequest( $sKey, $bIncludeCookie = true, $mDefault = null ) {
 			$mFetchVal = self::FetchPost( $sKey );
 			if ( is_null( $mFetchVal ) ) {
 				$mFetchVal = self::FetchGet( $sKey );
-				if ( is_null( $mFetchVal && $infIncludeCookie ) ) {
+				if ( is_null( $mFetchVal && $bIncludeCookie ) ) {
 					$mFetchVal = self::FetchCookie( $sKey );
 				}
 			}
