@@ -1,21 +1,6 @@
 <?php
-/**
- * Copyright (c) 2014 iControlWP <support@icontrolwp.com>
- * All rights reserved.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
- * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
 
-class ICWP_CCBC_Processor_GeoLocation_V1 {
+class ICWP_CCBC_Processor_GeoLocation {
 
 	const CbcDataCountryNameCookie = 'cbc_country_name';
 	const CbcDataCountryCodeCookie = 'cbc_country_code';
@@ -45,31 +30,54 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	public function __construct() { }
 
 	/**
-	 * @param $fHtmlOff
+	 * @var ICWP_CCBC_Processor_GeoLocation
+	 */
+	protected static $oInstance = NULL;
+
+	/**
+	 * @return ICWP_CCBC_Processor_GeoLocation
+	 */
+	public static function GetInstance() {
+		if ( is_null( self::$oInstance ) ) {
+			self::$oInstance = new self();
+		}
+		return self::$oInstance;
+	}
+
+	/**
+	 * @param bool $fHtmlOff
+	 * @return $this
 	 */
 	public function setModeHtmlOff( $fHtmlOff ) {
-		$this->fHtmlOffMode = $fHtmlOff;
+		$this->fHtmlOffMode = (bool)$fHtmlOff;
+		return $this;
 	}
 
 	/**
-	 * @param $fOn
+	 * @param bool $fOn
+	 * @return $this
 	 */
 	public function setModeW3tcCompatibility( $fOn ) {
-		$this->fW3tcCompatibilityMode = $fOn;
+		$this->fW3tcCompatibilityMode = (bool)$fOn;
+		return $this;
 	}
 
 	/**
-	 * @param $fOn
+	 * @param bool $fOn
+	 * @return $this
 	 */
 	public function setModeDeveloper( $fOn ) {
-		$this->fDeveloperMode = $fOn;
+		$this->fDeveloperMode = (bool)$fOn;
+		return $this;
 	}
 
 	/**
-	 * @param $sPrefix
+	 * @param string $sPrefix
+	 * @return $this
 	 */
 	public function setWpOptionPrefix( $sPrefix ) {
-		$this->sWpOptionPrefix = $sPrefix;
+		$this->sWpOptionPrefix = (string)$sPrefix;
+		return $this;
 	}
 
 	public function initShortCodes() {
@@ -95,42 +103,42 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	/**
 	 * The Shortcode function for CBC_AMAZON
 	 *
-	 * @param array $inaAtts
-	 * @param string $insContent
+	 * @param array  $aAtts
+	 * @param string $sContent
 	 * @return string
 	 */
-	public function sc_printAmazonLinkByCountry( $inaAtts = array(), $insContent = '' ) {
+	public function sc_printAmazonLinkByCountry( $aAtts = array(), $sContent = '' ) {
 
-		$this->def( $inaAtts, 'item' );
-		$this->def( $inaAtts, 'text', $insContent );
-		$this->def( $inaAtts, 'asin' );
-		$this->def( $inaAtts, 'country' );
+		$this->def( $aAtts, 'item' );
+		$this->def( $aAtts, 'text', $sContent );
+		$this->def( $aAtts, 'asin' );
+		$this->def( $aAtts, 'country' );
 
-		if ( !empty( $inaAtts['asin'] ) ) {
-			$sAsinToUse = $inaAtts['asin'];
+		if ( !empty( $aAtts['asin'] ) ) {
+			$sAsinToUse = $aAtts['asin'];
 		}
 		else {
-			$inaAtts['item'] = strtolower( $inaAtts['item'] );
+			$aAtts['item'] = strtolower( $aAtts['item'] );
 
-			if ( array_key_exists( $inaAtts['item'], $this->m_aPreselectedAffItems ) ) {
-				$sAsinToUse = $this->m_aPreselectedAffItems[ $inaAtts['item'] ];
+			if ( array_key_exists( $aAtts['item'], $this->m_aPreselectedAffItems ) ) {
+				$sAsinToUse = $this->m_aPreselectedAffItems[ $aAtts['item'] ];
 			}
 			else {
 				return ''; //ASIN is undefined or the "item" does not exist.
 			}
 		}
 
-		if ( empty( $inaAtts['country'] ) ) {
+		if ( empty( $aAtts['country'] ) ) {
 			$sLink = $this->buildAffLinkFromAsinOnly( $sAsinToUse );
 		}
 		else {
-			$sLink = $this->buildAffLinkFromCountryCode( $sAsinToUse, $inaAtts['country'] );
+			$sLink = $this->buildAffLinkFromCountryCode( $sAsinToUse, $aAtts['country'] );
 		}
 
 		$sOutputText = '<a class="cbc_amazon_link" href="%s" target="_blank">%s</a>';
 		return sprintf( $sOutputText,
 			$sLink,
-			do_shortcode( $inaAtts['text'] )
+			do_shortcode( $aAtts['text'] )
 		);
 	}
 
@@ -186,7 +194,7 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 		$sOutput = do_shortcode( $fShowContent ? $sContent : $aParams['message'] );
 
 		$this->def( $aParams, 'class', 'cbc_content' );
-		return $this->printShortcodeHtml( $aParams, $sOutput );
+		return $this->printShortCodeHtml( $aParams, $sOutput );
 
 	}
 
@@ -205,7 +213,7 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	 */
 	public function sc_printVisitorCountryName( $aParams = array() ) {
 		$this->def( $aParams, 'class', 'cbc_country' );
-		return $this->printShortcodeHtml( $aParams, $this->getVisitorCountryName() );
+		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryName() );
 	}
 
 	/**
@@ -215,7 +223,7 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	public function sc_printVisitorIpAddress( $aParams = array() ) {
 		$oDp = $this->loadDataProcessor();
 		$this->def( $aParams, 'class', 'cbc_ip' );
-		return $this->printShortcodeHtml( $aParams, $oDp->GetVisitorIpAddress( false ) );
+		return $this->printShortCodeHtml( $aParams, $oDp->GetVisitorIpAddress( false ) );
 	}
 
 	/**
@@ -342,8 +350,8 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 			$oCountryData = $this->loadVisitorCountryData();
 		}
 
-		$nTimeToExpire = time()+24*3600;
 		$oDp = $this->loadDataProcessor();
+		$nTimeToExpire = $oDp->GetRequestTime() + DAY_IN_SECONDS;
 
 		//set the cookie for future reference if it hasn't been set yet.
 		if ( !$oDp->FetchCookie( self::CbcDataCountryNameCookie ) && isset( $oCountryData->country ) ) {
@@ -377,7 +385,7 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	}
 
 	/**
-	 * @param $aSrc
+	 * @param array $aSrc
 	 * @param $insKey
 	 * @param string $insValue
 	 */
@@ -393,11 +401,15 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 	 *
 	 * E.g. noEmptyElement( aSomeArray, sSomeArrayKey, "style" )
 	 * will return String: style="aSomeArray[sSomeArrayKey]" or empty string.
+	 *
+	 * @param array $aArgs
+	 * @param string $sAttrKey
+	 * @param string $sElement
 	 */
-	protected function noEmptyElement( &$inaArgs, $insAttrKey, $insElement = '' ) {
-		$sAttrValue = $inaArgs[$insAttrKey];
-		$insElement = ( $insElement == '' )? $insAttrKey : $insElement;
-		$inaArgs[$insAttrKey] = ( empty($sAttrValue) ) ? '' : ' '.$insElement.'="'.$sAttrValue.'"';
+	protected function noEmptyElement( &$aArgs, $sAttrKey, $sElement = '' ) {
+		$sAttrValue = $aArgs[ $sAttrKey ];
+		$sElement = ( $sElement == '' )? $sAttrKey : $sElement;
+		$aArgs[ $sAttrKey ] = empty( $sAttrValue ) ? '' : sprintf( ' %s="%s"', $sElement, $sAttrValue );
 	}
 
 	/**
@@ -526,23 +538,3 @@ class ICWP_CCBC_Processor_GeoLocation_V1 {
 		);
 	}
 }
-
-if ( !class_exists('ICWP_CCBC_Processor_GeoLocation') ):
-	class ICWP_CCBC_Processor_GeoLocation extends ICWP_CCBC_Processor_GeoLocation_V1 {
-
-		/**
-		 * @var ICWP_CCBC_Processor_GeoLocation
-		 */
-		protected static $oInstance = NULL;
-
-		/**
-		 * @return ICWP_CCBC_Processor_GeoLocation
-		 */
-		public static function GetInstance() {
-			if ( is_null( self::$oInstance ) ) {
-				self::$oInstance = new self();
-			}
-			return self::$oInstance;
-		}
-	}
-endif;

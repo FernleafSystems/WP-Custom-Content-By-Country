@@ -335,10 +335,11 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 		if ( !isset( $this->oProcessorGeoLocation ) ) {
 			require_once( dirname( __FILE__ ).ICWP_DS.'icwp-ccbc-processor.php' );
 			$this->oProcessorGeoLocation = new ICWP_CCBC_Processor_GeoLocation();
-			$this->oProcessorGeoLocation->setModeHtmlOff( $this->getOption( 'enable_html_off_mode' ) == 'Y' );
-			$this->oProcessorGeoLocation->setModeW3tcCompatibility( $this->getOption( 'enable_w3tc_compatibility_mode' ) == 'Y' );
-			$this->oProcessorGeoLocation->setModeDeveloper( $this->getOption( 'enable_developer_mode' ) === 'Y' );
-			$this->oProcessorGeoLocation->setWpOptionPrefix( $this->oPluginVo->getOptionStoragePrefix() );
+			$this->oProcessorGeoLocation
+				->setModeHtmlOff( $this->getOption( 'enable_html_off_mode' ) == 'Y' )
+				->setModeW3tcCompatibility( $this->getOption( 'enable_w3tc_compatibility_mode' ) == 'Y' )
+				->setModeDeveloper( $this->getOption( 'enable_developer_mode' ) === 'Y' )
+				->setWpOptionPrefix( $this->oPluginVo->getOptionStoragePrefix() );
 		}
 		return $this->oProcessorGeoLocation;
 	}
