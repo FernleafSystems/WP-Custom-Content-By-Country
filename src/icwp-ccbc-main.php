@@ -199,43 +199,52 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 
 	}
 
-	private function importMysqlFile( $insFilename ) {
+	private function importMysqlFile( $sFilename ) {
 
-		global $wpdb;
-
-		if (!file_exists($insFilename)) {
+		if ( !file_exists( $sFilename ) ) {
 			return false;
 		}
 
-		$aSqlLines = file( $insFilename );
+		$aSqlLines = file( $sFilename );
 		if ( !is_array($aSqlLines) ) {
 			return false;
 		}
 
 		$aSqlStartTerms = array('INSERT', 'UPDATE', 'DELETE', 'DROP', 'GRANT', 'REVOKE', 'CREATE', 'ALTER');
 		$aQueries = array();
-		foreach ( $aSqlLines as $sLine ) {
+		$sNewQuery = '';
+		foreach ( $aSqlLines as $nKey => $sLine ) {
 			$sLine = trim( $sLine );
+			if ( empty( $sLine ) ) {
+				continue;
+			}
 			if ( preg_match( "/^(".implode( '|', $aSqlStartTerms ).")\s+/i", $sLine ) ) {
+
+				// commit the new query to the Query Set before processing the next
 				if ( !empty( $sNewQuery ) ) {
 					$aQueries[] = $sNewQuery;
-					$sNewQuery = '';
 				}
 				$sNewQuery = $sLine;
 			}
 			else {
-				$sNewQuery .= $sLine;
+				$sNewQuery .= ' '.$sLine;
 			}
+			unset( $aSqlLines[ $nKey ] );
 		}
 
 		if ( !empty( $sNewQuery ) ) {
 			$aQueries[] = $sNewQuery;
 		}
+		$this->executeQuerySet( $aQueries );
 
-		foreach ($aQueries as $to_run) {
-			$wpdb->query($to_run);
-		}
 		return true;
+	}
+
+	private function executeQuerySet( $aQueries ) {
+		global $wpdb;
+		foreach ( $aQueries as $nKey => $sQuery ) {
+			$wpdb->query( $sQuery );
+		}
 	}
 
 	private function adminNoticeIp2NationsDb() {
