@@ -4,7 +4,7 @@ Donate link: http://icwp.io/q
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
 Tested up to: 4.7
-Stable tag: 2.17.161112
+Stable tag: 2.17.170521
 
 == Description ==
 
@@ -140,6 +140,11 @@ ip2nationCountries
 = TODO =
 
 * Add option to remove the ip2nations data from the database.
+
+= 2.17.170521 =
+*released 16th June 2017*
+
+* UPDATED:  Updated Geo location database to latest available version: 2017-05-21.
 
 = 2.17.161112 =
 *released 17th November 2016*
