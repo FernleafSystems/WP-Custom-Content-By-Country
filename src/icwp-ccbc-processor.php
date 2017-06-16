@@ -27,12 +27,13 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 */
 	protected $sWpOptionPrefix = '';
 
-	public function __construct() { }
+	public function __construct() {
+	}
 
 	/**
 	 * @var ICWP_CCBC_Processor_GeoLocation
 	 */
-	protected static $oInstance = NULL;
+	protected static $oInstance = null;
 
 	/**
 	 * @return ICWP_CCBC_Processor_GeoLocation
@@ -83,16 +84,16 @@ class ICWP_CCBC_Processor_GeoLocation {
 	public function initShortCodes() {
 
 		$aShortCodeMapping = array(
-			'CBC'			=> 	'sc_printContentByCountry',
-			'CBC_COUNTRY'	=>	'sc_printVisitorCountryName',
-			'CBC_CODE'		=>	'sc_printVisitorCountryCode',
-			'CBC_IP'		=>	'sc_printVisitorIpAddress',
-			'CBC_AMAZON'	=>	'sc_printAmazonLinkByCountry'
-//			'CBC_HELP'		=>	'printHelp',
+			'CBC'         => 'sc_printContentByCountry',
+			'CBC_COUNTRY' => 'sc_printVisitorCountryName',
+			'CBC_CODE'    => 'sc_printVisitorCountryCode',
+			'CBC_IP'      => 'sc_printVisitorIpAddress',
+			'CBC_AMAZON'  => 'sc_printAmazonLinkByCountry'
+			//			'CBC_HELP'		=>	'printHelp',
 		);
 
 		if ( function_exists( 'add_shortcode' ) && !empty( $aShortCodeMapping ) ) {
-			foreach( $aShortCodeMapping as $sShortCode => $sCallbackFunction ) {
+			foreach ( $aShortCodeMapping as $sShortCode => $sCallbackFunction ) {
 				if ( is_callable( array( $this, $sCallbackFunction ) ) ) {
 					add_shortcode( $sShortCode, array( $this, $sCallbackFunction ) );
 				}
@@ -102,77 +103,75 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 	/**
 	 * The Shortcode function for CBC_AMAZON
-	 *
 	 * @param array  $aAtts
 	 * @param string $sContent
 	 * @return string
 	 */
 	public function sc_printAmazonLinkByCountry( $aAtts = array(), $sContent = '' ) {
+		$aAtts = shortcode_atts(
+			array(
+				'item'    => '',
+				'text'    => $sContent,
+				'asin'    => '',
+				'country' => '',
+			),
+			$aAtts
+		);
 
-		$this->def( $aAtts, 'item' );
-		$this->def( $aAtts, 'text', $sContent );
-		$this->def( $aAtts, 'asin' );
-		$this->def( $aAtts, 'country' );
-
-		if ( !empty( $aAtts['asin'] ) ) {
-			$sAsinToUse = $aAtts['asin'];
+		if ( !empty( $aAtts[ 'asin' ] ) ) {
+			$sAsinToUse = $aAtts[ 'asin' ];
 		}
 		else {
-			$aAtts['item'] = strtolower( $aAtts['item'] );
+			$aAtts[ 'item' ] = strtolower( $aAtts[ 'item' ] );
 
-			if ( array_key_exists( $aAtts['item'], $this->m_aPreselectedAffItems ) ) {
-				$sAsinToUse = $this->m_aPreselectedAffItems[ $aAtts['item'] ];
+			if ( array_key_exists( $aAtts[ 'item' ], $this->m_aPreselectedAffItems ) ) {
+				$sAsinToUse = $this->m_aPreselectedAffItems[ $aAtts[ 'item' ] ];
 			}
 			else {
 				return ''; //ASIN is undefined or the "item" does not exist.
 			}
 		}
 
-		if ( empty( $aAtts['country'] ) ) {
+		if ( empty( $aAtts[ 'country' ] ) ) {
 			$sLink = $this->buildAffLinkFromAsinOnly( $sAsinToUse );
 		}
 		else {
-			$sLink = $this->buildAffLinkFromCountryCode( $sAsinToUse, $aAtts['country'] );
+			$sLink = $this->buildAffLinkFromCountryCode( $sAsinToUse, $aAtts[ 'country' ] );
 		}
 
 		$sOutputText = '<a class="cbc_amazon_link" href="%s" target="_blank">%s</a>';
-		return sprintf( $sOutputText,
-			$sLink,
-			do_shortcode( $aAtts['text'] )
-		);
+		return sprintf( $sOutputText, $sLink, do_shortcode( $aAtts[ 'text' ] ) );
 	}
 
 	/**
 	 * Meat and Potatoes of the CBC plugin
-	 *
 	 * By default, $insContent will be "shown" for whatever countries are specified.
-	 *
 	 * Alternatively, set to 'n' if you want to hide.
-	 *
 	 * Logic is: if visitor is coming from a country in the 'country' list and show='y', then show the content.
 	 * OR
 	 * If the visitor is not from a country in the 'country' list and show='n', then show the content.
-	 *
 	 * Otherwise display 'message' if defined.
-	 *
 	 * 'message' is displayed where the the content isn't displayed.
-	 *
-	 * @param $aParams
+	 * @param        $aParams
 	 * @param string $sContent
 	 * @return string
 	 */
 	public function sc_printContentByCountry( $aParams = array(), $sContent = '' ) {
+		$aParams = shortcode_atts(
+			array(
+				'message' => '',
+				'show'    => 'y',
+				'country' => '',
+			),
+			$aParams
+		);
 
-		$this->def( $aParams, 'country', '' );
-		$this->def( $aParams, 'show', 'y' );		//defaults to displaying content
-		$this->def( $aParams, 'message', '' );		//defaults to no message
-
-		$aParams['country'] = str_replace( ' ', '', strtolower( $aParams['country'] ) );
-		if( empty( $aParams['country'] ) ) {
+		$aParams[ 'country' ] = str_replace( ' ', '', strtolower( $aParams[ 'country' ] ) );
+		if ( empty( $aParams[ 'country' ] ) ) {
 			return do_shortcode( $sContent );
 		}
 
-		$aSelectedCountries = explode( ',', $aParams['country'] );
+		$aSelectedCountries = explode( ',', $aParams[ 'country' ] );
 		//FIX for use "iso_code_2" db column instead of "code"
 		if ( in_array( 'uk', $aSelectedCountries ) ) {
 			$aSelectedCountries[] = 'gb';
@@ -182,7 +181,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 		$fIsVisitorFromSelectedCountries = in_array( $sVisitorCountryCode, $aSelectedCountries );
 
 		// we default to show
-		$fDoShowVisitorContentSetting = strtolower( $aParams['show'] ) != 'n';
+		$fDoShowVisitorContentSetting = strtolower( $aParams[ 'show' ] ) != 'n';
 		$fShowContent = true;
 		if ( !$fDoShowVisitorContentSetting && $fIsVisitorFromSelectedCountries ) {
 			$fShowContent = false;
@@ -191,11 +190,10 @@ class ICWP_CCBC_Processor_GeoLocation {
 			$fShowContent = false;
 		}
 
-		$sOutput = do_shortcode( $fShowContent ? $sContent : $aParams['message'] );
+		$sOutput = do_shortcode( $fShowContent ? $sContent : $aParams[ 'message' ] );
 
 		$this->def( $aParams, 'class', 'cbc_content' );
 		return $this->printShortCodeHtml( $aParams, $sOutput );
-
 	}
 
 	/**
@@ -203,7 +201,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function sc_printVisitorCountryCode( $aParams = array() ) {
-		$this->def( $aParams, 'class', 'cbc_countrycode' );
+		$aParams = shortcode_atts( array( 'class' => 'cbc_countrycode' ), $aParams );
 		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryCode() );
 	}
 
@@ -212,7 +210,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function sc_printVisitorCountryName( $aParams = array() ) {
-		$this->def( $aParams, 'class', 'cbc_country' );
+		$aParams = shortcode_atts( array( 'class' => 'cbc_country' ), $aParams );
 		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryName() );
 	}
 
@@ -221,13 +219,12 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function sc_printVisitorIpAddress( $aParams = array() ) {
-		$oDp = $this->loadDataProcessor();
-		$this->def( $aParams, 'class', 'cbc_ip' );
-		return $this->printShortCodeHtml( $aParams, $oDp->GetVisitorIpAddress( false ) );
+		$aParams = shortcode_atts( array( 'class' => 'cbc_ip' ), $aParams );
+		return $this->printShortCodeHtml( $aParams, $this->loadDataProcessor()->GetVisitorIpAddress( false ) );
 	}
 
 	/**
-	 * @param $aParams
+	 * @param        $aParams
 	 * @param string $sContent
 	 * @return string
 	 */
@@ -241,15 +238,15 @@ class ICWP_CCBC_Processor_GeoLocation {
 		$this->noEmptyElement( $aParams, 'style' );
 		$this->noEmptyElement( $aParams, 'class' );
 
-		if ( $this->getHtmlIsOff( $aParams['html'] ) || empty( $sContent )  ) {
+		if ( $this->getHtmlIsOff( $aParams[ 'html' ] ) || empty( $sContent ) ) {
 			$sReturnContent = $sContent;
 		}
 		else {
-			$aParams['html'] = empty($aParams['html'])? 'span' : $aParams['html'];
-			$sReturnContent = '<'.$aParams['html']
-				.$aParams['style']
-				.$aParams['class']
-				.$aParams['id'].'>'.$sContent.'</'.$aParams['html'].'>';
+			$aParams[ 'html' ] = empty( $aParams[ 'html' ] ) ? 'span' : $aParams[ 'html' ];
+			$sReturnContent = '<' . $aParams[ 'html' ]
+				. $aParams[ 'style' ]
+				. $aParams[ 'class' ]
+				. $aParams[ 'id' ] . '>' . $sContent . '</' . $aParams[ 'html' ] . '>';
 		}
 
 		return trim( $sReturnContent );
@@ -370,8 +367,8 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return ICWP_CCBC_DataProcessor
 	 */
 	public function loadDataProcessor() {
-		if ( !class_exists('ICWP_CCBC_DataProcessor') ) {
-			require_once( dirname(__FILE__).'/icwp-data-processor.php' );
+		if ( !class_exists( 'ICWP_CCBC_DataProcessor' ) ) {
+			require_once( dirname( __FILE__ ) . '/icwp-data-processor.php' );
 		}
 		return ICWP_CCBC_DataProcessor::GetInstance();
 	}
@@ -381,34 +378,32 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return mixed
 	 */
 	protected function getOption( $sKey ) {
-		return get_option( $this->sWpOptionPrefix.$sKey );
+		return get_option( $this->sWpOptionPrefix . $sKey );
 	}
 
 	/**
-	 * @param array $aSrc
-	 * @param $insKey
+	 * @param array  $aSrc
+	 * @param string $insKey
 	 * @param string $insValue
 	 */
 	protected function def( &$aSrc, $insKey, $insValue = '' ) {
-		if ( !isset( $aSrc[$insKey] ) ) {
-			$aSrc[$insKey] = $insValue;
+		if ( is_array( $aSrc ) && !isset( $aSrc[ $insKey ] ) ) {
+			$aSrc[ $insKey ] = $insValue;
 		}
 	}
 
 	/**
 	 * Takes an array, an array key and an element type. If value is empty, sets the html element
 	 * string to empty string, otherwise forms a complete html element parameter.
-	 *
 	 * E.g. noEmptyElement( aSomeArray, sSomeArrayKey, "style" )
 	 * will return String: style="aSomeArray[sSomeArrayKey]" or empty string.
-	 *
-	 * @param array $aArgs
+	 * @param array  $aArgs
 	 * @param string $sAttrKey
 	 * @param string $sElement
 	 */
 	protected function noEmptyElement( &$aArgs, $sAttrKey, $sElement = '' ) {
 		$sAttrValue = $aArgs[ $sAttrKey ];
-		$sElement = ( $sElement == '' )? $sAttrKey : $sElement;
+		$sElement = ( $sElement == '' ) ? $sAttrKey : $sElement;
 		$aArgs[ $sAttrKey ] = empty( $sAttrValue ) ? '' : sprintf( ' %s="%s"', $sElement, $sAttrValue );
 	}
 
@@ -434,22 +429,20 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 	/**
 	 * Given the country code and the product ASIN code, returns an Amazon link.
-	 *
 	 * If the country code isn't found in the country code mapping, 'global' (amazon.com) is used.
-	 *
 	 * @param $sAsin
 	 * @param $sCountryCode
 	 * @return string
 	 */
 	public function buildAffLinkFromCountryCode( $sAsin, $sCountryCode ) {
 
-		$sAmazonSiteCode = 'global';	//the default: amazon.com
+		$sAmazonSiteCode = 'global';    //the default: amazon.com
 		$aAmazonCountryCodeToSiteMap = $this->getAmazonCountryCodeToSiteMap();
 		$aAmazonSitesData = $this->getAmazonSitesData();
 
 		if ( array_key_exists( $sCountryCode, $aAmazonCountryCodeToSiteMap ) ) {
 			//special country code mapping that has been provisioned for. e.g. ie => uk amazon site
-			$sAmazonSiteCode = $aAmazonCountryCodeToSiteMap[$sCountryCode];
+			$sAmazonSiteCode = $aAmazonCountryCodeToSiteMap[ $sCountryCode ];
 		}
 		else if ( array_key_exists( $sCountryCode, $aAmazonSitesData ) ) {
 			$sAmazonSiteCode = $sCountryCode;
@@ -460,7 +453,6 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 	/**
 	 * Give it an Amazon site (defaults to "global") and an ASIN and it will create it.
-	 *
 	 * @param string $sAsin
 	 * @param string $sAmazonSite
 	 * @return string
@@ -472,14 +464,13 @@ class ICWP_CCBC_Processor_GeoLocation {
 			$sAmazonSite = 'global';
 		}
 
-		list( $sAmazonDomain, $sAssociateIdTag ) = $aAmazonSitesData[$sAmazonSite];
+		list( $sAmazonDomain, $sAssociateIdTag ) = $aAmazonSitesData[ $sAmazonSite ];
 		$sAssociateIdTag = $this->getOption( $sAssociateIdTag );
 		return $this->buildAffLinkAmazon( $sAsin, $sAmazonDomain, $sAssociateIdTag );
 	}
 
 	/**
 	 * The most basic link builder.
-	 *
 	 * @param string $sAsin
 	 * @param string $sAmazonDomain
 	 * @param string $sAffIdTag
@@ -516,8 +507,8 @@ class ICWP_CCBC_Processor_GeoLocation {
 	private function getAmazonCountryCodeToSiteMap() {
 		return array(
 			//country code	//Amazon site
-			'us'			=>	'global',	//US is the default
-			'ie'			=>	'uk',
+			'us' => 'global',    //US is the default
+			'ie' => 'uk',
 		);
 	}
 
@@ -526,15 +517,15 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 */
 	private function getAmazonSitesData() {
 		return array(
-			'global'	=>	array( 'com',		'afftag_amazon_region_us'		),
-			'ca'		=>	array( 'ca',		'afftag_amazon_region_canada'	),
-			'uk'		=>	array( 'co.uk',		'afftag_amazon_region_uk'		),
-			'fr'		=>	array( 'fr',		'afftag_amazon_region_france'	),
-			'de'		=>	array( 'de',		'afftag_amazon_region_germany'	),
-			'it'		=>	array( 'it',		'afftag_amazon_region_italy'	),
-			'es'		=>	array( 'es',		'afftag_amazon_region_spain'	),
-			'jp'		=>	array( 'co.jp',		'afftag_amazon_region_japan'	),
-			'cn'		=>	array( 'cn',		'afftag_amazon_region_china'	)
+			'global' => array( 'com', 'afftag_amazon_region_us' ),
+			'ca'     => array( 'ca', 'afftag_amazon_region_canada' ),
+			'uk'     => array( 'co.uk', 'afftag_amazon_region_uk' ),
+			'fr'     => array( 'fr', 'afftag_amazon_region_france' ),
+			'de'     => array( 'de', 'afftag_amazon_region_germany' ),
+			'it'     => array( 'it', 'afftag_amazon_region_italy' ),
+			'es'     => array( 'es', 'afftag_amazon_region_spain' ),
+			'jp'     => array( 'co.jp', 'afftag_amazon_region_japan' ),
+			'cn'     => array( 'cn', 'afftag_amazon_region_china' )
 		);
 	}
 }
