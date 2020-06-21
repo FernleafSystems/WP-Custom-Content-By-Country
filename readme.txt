@@ -1,10 +1,11 @@
-=== Custom Content by Country (by iControlWP) ===
-Contributors: paultgoodchild
-Donate link: http://icwp.io/q
+=== Custom Content by Country (by One Dollar Plugin) ===
+Contributors: paultgoodchild, onedollarplugin
+Donate link: https://icwp.io/d9
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 4.9
-Stable tag: 2.18.170521
+Tested up to: 5.4
+Requires PHP: 5.4
+Stable tag: 2.18.200520
 
 == Description ==
 
@@ -140,6 +141,17 @@ ip2nationCountries
 = TODO =
 
 * Add option to remove the ip2nations data from the database.
+
+= 2.18.200520 =
+*released 21st June 2020*
+
+* UPDATED:  Move to minimum PHP 5.4 and cleaned some code.
+* UPDATED:  Updated Geo location database to latest available version: 2020-05-20.
+
+= 2.18.180726 =
+*released 30th August 2018*
+
+* UPDATED:  Updated Geo location database to latest available version: 2018-07-26.
 
 = 2.18.170521 =
 *released 16th June 2017*
@@ -291,9 +303,3 @@ and the plugin will automatically use it with the appropriate site and generate 
 = 1.0 =
 
 * First Release
-
-== Upgrade Notice ==
-
-= 2.11 =
-
-* ADDED: Feature to allow you to by-pass W3TC Total Cache PAGE CACHING for pages that use this shortcode. See FAQs.
