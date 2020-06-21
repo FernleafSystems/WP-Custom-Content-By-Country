@@ -4,7 +4,7 @@ if ( class_exists( 'ICWP_CCBC_Wordpress_Plugin_V1' ) ) {
 	return;
 }
 
-class ICWP_CCBC_Wordpress_Plugin_V1 {
+abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 
 	const ViewDir = 'views';
 	const SrcDir = 'src';
@@ -68,14 +68,6 @@ class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @var string
 	 */
 	protected static $aFeatures;
-
-	/**
-	 */
-	protected function __construct() {
-		if ( empty( self::$sRootFile ) ) {
-			self::$sRootFile = __FILE__;
-		}
-	}
 
 	/**
 	 * @return string

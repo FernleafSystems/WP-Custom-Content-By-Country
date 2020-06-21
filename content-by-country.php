@@ -29,12 +29,11 @@ Author URI: https://icwp.io/da
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-require_once( dirname(__FILE__).'/src/icwp-base.php' );
+require_once( __DIR__.'/src/icwp-base.php' );
 
 class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 
 	const Ip2NationDbVersion = '20200520A';
-
 	const Ip2NationDbVersionKey = 'ip2nation_version';
 
 	/**
@@ -56,13 +55,13 @@ class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 		if ( empty( self::$sRootFile ) ) {
 			self::$sRootFile = __FILE__;
 		}
-		self::$aFeatures = array(
+		self::$aFeatures = [
 			'plugin',
 			'css',
 			'less'
-		);
+		];
 		self::$sParentSlug = 'worpit';
-		self::$sVersion = '2.18.180726';
+		self::$sVersion = '2.18.200520';
 		self::$sPluginSlug = 'cbc';
 		self::$sHumanName = 'Custom Content By Country';
 		self::$sMenuTitleName = 'Content By Country';
@@ -85,5 +84,5 @@ class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 	}
 }
 
-include_once( dirname(__FILE__).'/src/icwp-ccbc-main.php' );
+include_once( dirname( __FILE__ ).'/src/icwp-ccbc-main.php' );
 $oICWP_CBC = new ICWP_CustomContentByCountry( ICWP_CustomContentByCountry_Plugin::GetInstance() );

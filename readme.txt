@@ -142,6 +142,12 @@ ip2nationCountries
 
 * Add option to remove the ip2nations data from the database.
 
+= 2.18.200520 =
+*released 21st June 2020*
+
+* UPDATED:  Move to minimum PHP 5.4 and cleaned some code.
+* UPDATED:  Updated Geo location database to latest available version: 2020-05-20.
+
 = 2.18.180726 =
 *released 30th August 2018*
 
@@ -297,9 +303,3 @@ and the plugin will automatically use it with the appropriate site and generate 
 = 1.0 =
 
 * First Release
-
-== Upgrade Notice ==
-
-= 2.11 =
-
-* ADDED: Feature to allow you to by-pass W3TC Total Cache PAGE CACHING for pages that use this shortcode. See FAQs.
