@@ -1,22 +1,13 @@
 <?php
 
-if ( !defined('ICWP_DS') ) {
-	define( 'ICWP_DS', DIRECTORY_SEPARATOR );
+if ( class_exists( 'ICWP_CCBC_Wordpress_Plugin_V1' ) ) {
+	return;
 }
-
-if ( !class_exists('ICWP_CCBC_Wordpress_Plugin_V1') ):
 
 class ICWP_CCBC_Wordpress_Plugin_V1 {
 
-	/**
-	 * @const string
-	 */
-	const ViewDir				= 'views';
-
-	/**
-	 * @const string
-	 */
-	const SrcDir				= 'src';
+	const ViewDir = 'views';
+	const SrcDir = 'src';
 
 	/**
 	 * @var string
@@ -26,7 +17,7 @@ class ICWP_CCBC_Wordpress_Plugin_V1 {
 	/**
 	 * @var string
 	 */
-	protected static $sParentSlug	= 'icwp';
+	protected static $sParentSlug = 'icwp';
 
 	/**
 	 * @var string
@@ -165,7 +156,7 @@ class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getRootDir() {
-		return dirname( $this->getRootFile() ).ICWP_DS;
+		return trailingslashit( dirname( $this->getRootFile() ) );
 	}
 
 	/**
@@ -181,7 +172,7 @@ class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getSourceDir() {
-		return $this->getRootDir().self::SrcDir.ICWP_DS;
+		return trailingslashit( path_join( $this->getRootDir(), self::SrcDir ) );
 	}
 
 	/**
@@ -204,7 +195,6 @@ class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getViewDir() {
-		return $this->getRootDir().self::ViewDir.ICWP_DS;
+		return trailingslashit( path_join( $this->getRootDir(), self::ViewDir ) );
 	}
 }
-endif;

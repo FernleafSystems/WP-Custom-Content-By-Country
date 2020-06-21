@@ -3,13 +3,13 @@
 Plugin Name: Custom Content by Country (from iControlWP)
 Plugin URI: https://icwp.io/db
 Description: Tool for displaying/hiding custom content based on visitors country/location.
-Version: 2.18.180726
+Version: 2.18.200520
 Author: One Dollar Plugin
 Author URI: https://icwp.io/da
 */
 
 /**
- * Copyright (c) 2018 One Dollar Plugin <support@onedollarplugin.com>
+ * Copyright (c) 2020 One Dollar Plugin <support@onedollarplugin.com>
  * All rights reserved.
  *
  * "Custom Content by Country" is
@@ -30,9 +30,10 @@ Author URI: https://icwp.io/da
  */
 
 require_once( dirname(__FILE__).'/src/icwp-base.php' );
+
 class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 
-	const Ip2NationDbVersion = '20180726A';
+	const Ip2NationDbVersion = '20200520A';
 
 	const Ip2NationDbVersionKey = 'ip2nation_version';
 
@@ -51,8 +52,6 @@ class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 		return self::$oInstance;
 	}
 
-	/**
-	 */
 	protected function __construct() {
 		if ( empty( self::$sRootFile ) ) {
 			self::$sRootFile = __FILE__;

@@ -3,8 +3,9 @@ Contributors: paultgoodchild, onedollarplugin
 Donate link: https://icwp.io/d9
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 5.0
-Stable tag: 2.18.180726
+Tested up to: 5.4
+Requires PHP: 5.4
+Stable tag: 2.18.200520
 
 == Description ==
 

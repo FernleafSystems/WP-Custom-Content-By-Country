@@ -8,7 +8,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	protected $oDbCountryData;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 */
 	protected $fHtmlOffMode = false;
 
@@ -83,19 +83,19 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 	public function initShortCodes() {
 
-		$aShortCodeMapping = array(
+		$aShortCodeMapping = [
 			'CBC'         => 'sc_printContentByCountry',
 			'CBC_COUNTRY' => 'sc_printVisitorCountryName',
 			'CBC_CODE'    => 'sc_printVisitorCountryCode',
 			'CBC_IP'      => 'sc_printVisitorIpAddress',
 			'CBC_AMAZON'  => 'sc_printAmazonLinkByCountry'
 			//			'CBC_HELP'		=>	'printHelp',
-		);
+		];
 
 		if ( function_exists( 'add_shortcode' ) && !empty( $aShortCodeMapping ) ) {
 			foreach ( $aShortCodeMapping as $sShortCode => $sCallbackFunction ) {
-				if ( is_callable( array( $this, $sCallbackFunction ) ) ) {
-					add_shortcode( $sShortCode, array( $this, $sCallbackFunction ) );
+				if ( is_callable( [ $this, $sCallbackFunction ] ) ) {
+					add_shortcode( $sShortCode, [ $this, $sCallbackFunction ] );
 				}
 			}
 		}
@@ -107,14 +107,14 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @param string $sContent
 	 * @return string
 	 */
-	public function sc_printAmazonLinkByCountry( $aAtts = array(), $sContent = '' ) {
+	public function sc_printAmazonLinkByCountry( $aAtts = [], $sContent = '' ) {
 		$aAtts = shortcode_atts(
-			array(
+			[
 				'item'    => '',
 				'text'    => $sContent,
 				'asin'    => '',
 				'country' => '',
-			),
+			],
 			$aAtts
 		);
 
@@ -156,13 +156,13 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @param string $sContent
 	 * @return string
 	 */
-	public function sc_printContentByCountry( $aParams = array(), $sContent = '' ) {
+	public function sc_printContentByCountry( $aParams = [], $sContent = '' ) {
 		$aParams = shortcode_atts(
-			array(
+			[
 				'message' => '',
 				'show'    => 'y',
 				'country' => '',
-			),
+			],
 			$aParams
 		);
 
@@ -200,8 +200,8 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @param array $aParams
 	 * @return string
 	 */
-	public function sc_printVisitorCountryCode( $aParams = array() ) {
-		$aParams = shortcode_atts( array( 'class' => 'cbc_countrycode' ), $aParams );
+	public function sc_printVisitorCountryCode( $aParams = [] ) {
+		$aParams = shortcode_atts( [ 'class' => 'cbc_countrycode' ], $aParams );
 		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryCode() );
 	}
 
@@ -209,8 +209,8 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @param array $aParams
 	 * @return string
 	 */
-	public function sc_printVisitorCountryName( $aParams = array() ) {
-		$aParams = shortcode_atts( array( 'class' => 'cbc_country' ), $aParams );
+	public function sc_printVisitorCountryName( $aParams = [] ) {
+		$aParams = shortcode_atts( [ 'class' => 'cbc_country' ], $aParams );
 		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryName() );
 	}
 
@@ -218,8 +218,8 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @param array $aParams
 	 * @return string
 	 */
-	public function sc_printVisitorIpAddress( $aParams = array() ) {
-		$aParams = shortcode_atts( array( 'class' => 'cbc_ip' ), $aParams );
+	public function sc_printVisitorIpAddress( $aParams = [] ) {
+		$aParams = shortcode_atts( [ 'class' => 'cbc_ip' ], $aParams );
 		return $this->printShortCodeHtml( $aParams, $this->loadDataProcessor()->GetVisitorIpAddress( false ) );
 	}
 
@@ -243,10 +243,10 @@ class ICWP_CCBC_Processor_GeoLocation {
 		}
 		else {
 			$aParams[ 'html' ] = empty( $aParams[ 'html' ] ) ? 'span' : $aParams[ 'html' ];
-			$sReturnContent = '<' . $aParams[ 'html' ]
-				. $aParams[ 'style' ]
-				. $aParams[ 'class' ]
-				. $aParams[ 'id' ] . '>' . $sContent . '</' . $aParams[ 'html' ] . '>';
+			$sReturnContent = '<'.$aParams[ 'html' ]
+							  .$aParams[ 'style' ]
+							  .$aParams[ 'class' ]
+							  .$aParams[ 'id' ].'>'.$sContent.'</'.$aParams[ 'html' ].'>';
 		}
 
 		return trim( $sReturnContent );
@@ -368,7 +368,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 */
 	public function loadDataProcessor() {
 		if ( !class_exists( 'ICWP_CCBC_DataProcessor' ) ) {
-			require_once( dirname( __FILE__ ) . '/icwp-data-processor.php' );
+			require_once( dirname( __FILE__ ).'/icwp-data-processor.php' );
 		}
 		return ICWP_CCBC_DataProcessor::GetInstance();
 	}
@@ -378,7 +378,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return mixed
 	 */
 	protected function getOption( $sKey ) {
-		return get_option( $this->sWpOptionPrefix . $sKey );
+		return get_option( $this->sWpOptionPrefix.$sKey );
 	}
 
 	/**
@@ -444,7 +444,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 			//special country code mapping that has been provisioned for. e.g. ie => uk amazon site
 			$sAmazonSiteCode = $aAmazonCountryCodeToSiteMap[ $sCountryCode ];
 		}
-		else if ( array_key_exists( $sCountryCode, $aAmazonSitesData ) ) {
+		elseif ( array_key_exists( $sCountryCode, $aAmazonSitesData ) ) {
 			$sAmazonSiteCode = $sCountryCode;
 		}
 
@@ -505,27 +505,27 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return array
 	 */
 	private function getAmazonCountryCodeToSiteMap() {
-		return array(
+		return [
 			//country code	//Amazon site
 			'us' => 'global',    //US is the default
 			'ie' => 'uk',
-		);
+		];
 	}
 
 	/**
 	 * @return array
 	 */
 	private function getAmazonSitesData() {
-		return array(
-			'global' => array( 'com', 'afftag_amazon_region_us' ),
-			'ca'     => array( 'ca', 'afftag_amazon_region_canada' ),
-			'uk'     => array( 'co.uk', 'afftag_amazon_region_uk' ),
-			'fr'     => array( 'fr', 'afftag_amazon_region_france' ),
-			'de'     => array( 'de', 'afftag_amazon_region_germany' ),
-			'it'     => array( 'it', 'afftag_amazon_region_italy' ),
-			'es'     => array( 'es', 'afftag_amazon_region_spain' ),
-			'jp'     => array( 'co.jp', 'afftag_amazon_region_japan' ),
-			'cn'     => array( 'cn', 'afftag_amazon_region_china' )
-		);
+		return [
+			'global' => [ 'com', 'afftag_amazon_region_us' ],
+			'ca'     => [ 'ca', 'afftag_amazon_region_canada' ],
+			'uk'     => [ 'co.uk', 'afftag_amazon_region_uk' ],
+			'fr'     => [ 'fr', 'afftag_amazon_region_france' ],
+			'de'     => [ 'de', 'afftag_amazon_region_germany' ],
+			'it'     => [ 'it', 'afftag_amazon_region_italy' ],
+			'es'     => [ 'es', 'afftag_amazon_region_spain' ],
+			'jp'     => [ 'co.jp', 'afftag_amazon_region_japan' ],
+			'cn'     => [ 'cn', 'afftag_amazon_region_china' ]
+		];
 	}
 }
