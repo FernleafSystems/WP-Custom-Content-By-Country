@@ -1,7 +1,4 @@
 <?php
-if ( !defined('ICWP_DS') ) {
-	define( 'ICWP_DS', DIRECTORY_SEPARATOR );
-}
 
 include_once( dirname(__FILE__).'/icwp-wpfunctions.php' );
 
