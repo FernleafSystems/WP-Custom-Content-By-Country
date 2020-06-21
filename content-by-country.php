@@ -1,15 +1,15 @@
 <?php
 /*
 Plugin Name: Custom Content by Country (from iControlWP)
-Plugin URI: http://icwp.io/4p
+Plugin URI: https://icwp.io/db
 Description: Tool for displaying/hiding custom content based on visitors country/location.
-Version: 2.18.170521
-Author: iControlWP
-Author URI: http://icwp.io/home
+Version: 2.18.180726
+Author: One Dollar Plugin
+Author URI: https://icwp.io/da
 */
 
 /**
- * Copyright (c) 2016 iControlWP <support@icontrolwp.com>
+ * Copyright (c) 2018 One Dollar Plugin <support@onedollarplugin.com>
  * All rights reserved.
  *
  * "Custom Content by Country" is
@@ -32,7 +32,7 @@ Author URI: http://icwp.io/home
 require_once( dirname(__FILE__).'/src/icwp-base.php' );
 class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 
-	const Ip2NationDbVersion = '20170521A';
+	const Ip2NationDbVersion = '20180726A';
 
 	const Ip2NationDbVersionKey = 'ip2nation_version';
 
@@ -63,7 +63,7 @@ class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 			'less'
 		);
 		self::$sParentSlug = 'worpit';
-		self::$sVersion = '2.18.170521';
+		self::$sVersion = '2.18.180726';
 		self::$sPluginSlug = 'cbc';
 		self::$sHumanName = 'Custom Content By Country';
 		self::$sMenuTitleName = 'Content By Country';

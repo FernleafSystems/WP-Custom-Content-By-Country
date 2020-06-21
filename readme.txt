@@ -1,10 +1,10 @@
-=== Custom Content by Country (by iControlWP) ===
-Contributors: paultgoodchild
-Donate link: http://icwp.io/q
+=== Custom Content by Country (by One Dollar Plugin) ===
+Contributors: paultgoodchild, onedollarplugin
+Donate link: https://icwp.io/d9
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 4.9
-Stable tag: 2.18.170521
+Tested up to: 5.0
+Stable tag: 2.18.180726
 
 == Description ==
 
@@ -140,6 +140,11 @@ ip2nationCountries
 = TODO =
 
 * Add option to remove the ip2nations data from the database.
+
+= 2.18.180726 =
+*released 30th August 2018*
+
+* UPDATED:  Updated Geo location database to latest available version: 2018-07-26.
 
 = 2.18.170521 =
 *released 16th June 2017*
