@@ -3,7 +3,7 @@
 Plugin Name: Custom Content by Country (from Shield Security)
 Plugin URI: https://icwp.io/db
 Description: Tool for displaying/hiding custom content based on visitors country/location.
-Version: 2.19
+Version: 3.0.0
 Author: AptoWeb
 Author URI: https://icwp.io/da
 */
@@ -32,9 +32,6 @@ Author URI: https://icwp.io/da
 require_once( __DIR__.'/src/icwp-base.php' );
 
 class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
-
-	const Ip2NationDbVersion = '20200520A';
-	const Ip2NationDbVersionKey = 'ip2nation_version';
 
 	/**
 	 * @var ICWP_CustomContentByCountry_Plugin
@@ -68,21 +65,8 @@ class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 		self::$sTextDomain = 'custom-content-by-country';
 		self::$fLoggingEnabled = false;
 	}
-
-	/**
-	 * @return string
-	 */
-	public function getIp2NationsDbVersion() {
-		return self::Ip2NationDbVersion;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getIp2NationsDbVersionKey() {
-		return self::Ip2NationDbVersionKey;
-	}
 }
 
 include_once( dirname( __FILE__ ).'/src/icwp-ccbc-main.php' );
+require_once( __DIR__.'/vendor/autoload.php' );
 $oICWP_CBC = new ICWP_CustomContentByCountry( ICWP_CustomContentByCountry_Plugin::GetInstance() );

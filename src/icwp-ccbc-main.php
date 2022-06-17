@@ -9,12 +9,6 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 
 	protected $m_aPluginOptions_AffTagsSection;
 
-	protected $m_fIp2NationsDbInstall;
-
-	protected $m_fIp2NationsDbInstallAttempt;
-
-	protected $m_fSubmitCbcMainAttempt;
-
 	/**
 	 * @var ICWP_CCBC_Processor_GeoLocation
 	 */
@@ -30,31 +24,11 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 		register_deactivation_hook( __FILE__, [ $this, 'onWpDeactivatePlugin' ] );
 
 		$this->sPluginUrl = plugins_url( '/', $this->oPluginVo->getRootFile() );
-		$this->m_fIp2NationsDbInstall = false;
-		$this->m_fIp2NationsDbInstallAttempt = false;
-		$this->m_fSubmitCbcMainAttempt = false;
 	}
 
-	public function onWpInit() {
-		parent::onWpInit();
-
-		$fCbcEnabled = $this->getOption( 'enable_content_by_country' ) === 'Y';
-		$fAmazonAssociate = $this->getOption( 'enable_amazon_associate' ) === 'Y';
-		if ( $fCbcEnabled || $fAmazonAssociate ) {
-			$oGeoProcessor = $this->loadGeoLocationProcessor();
-			$oGeoProcessor->initShortCodes();
-		}
-
-		if ( $fCbcEnabled && $this->getOption( 'enable_developer_mode' ) !== 'Y' ) {
-			$oGeoProcessor = $this->loadGeoLocationProcessor();
-			$oGeoProcessor->setCountryDataCookies();
-		}
-	}
-
-	public function onWpAdminInit() {
-		parent::onWpAdminInit();
-		if ( isset( $_GET[ 'CBC_INSTALL_DB' ] ) && $_GET[ 'CBC_INSTALL_DB' ] == 'install' ) {
-			$this->installIp2NationsDb();
+	public function onWpLoaded() {
+		if ( $this->getOption( 'enable_content_by_country' ) === 'Y' || $this->getOption( 'enable_amazon_associate' ) === 'Y' ) {
+			$this->loadGeoLocationProcessor()->initShortCodes();
 		}
 	}
 
@@ -70,14 +44,10 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	}
 
 	public function onWpAdminNotices() {
-
-		if ( !current_user_can( 'manage_options' ) ) {
-			return;
+		if ( current_user_can( 'manage_options' ) ) {
+			$this->adminNoticeOptionsUpdated();
+			$this->adminNoticeVersionUpgrade();
 		}
-
-		$this->adminNoticeIp2NationsDb();
-		$this->adminNoticeOptionsUpdated();
-		$this->adminNoticeVersionUpgrade();
 	}
 
 	public function onWpDeactivatePlugin() {
@@ -85,15 +55,6 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 			return;
 		}
 		$this->deleteAllPluginDbOptions();
-	}
-
-	protected function handlePluginUpgrade() {
-		$sPrefix = $this->oPluginVo->getOptionStoragePrefix();
-		//Someone clicked the button to acknowledge the update
-		if ( isset( $_POST[ $sPrefix.'hide_update_notice' ] ) && isset( $_POST[ 'worpit_user_id' ] ) ) {
-			update_user_meta( $_POST[ 'worpit_user_id' ], $sPrefix.'current_version', $this->oPluginVo->getVersion() );
-			header( "Location: admin.php?page=".$this->getFullParentMenuId() );
-		}
 	}
 
 	/**
@@ -114,24 +75,6 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					"Provides the shortcodes for showing/hiding content based on visitor's location."
 				],
 				[
-					'enable_amazon_associate',
-					'',
-					'N',
-					'checkbox',
-					'Amazon Associates',
-					'Enable Amazon Associates Feature',
-					"Provides the shortcode to use Amazon Associate links based on visitor's location."
-				],
-				[
-					'enable_developer_mode',
-					'',
-					'Y',
-					'checkbox',
-					'Developer Mode',
-					'Enable Content By Country Developer Mode',
-					"When enabled, the country code data cookie will NOT be set. Useful if developing/testing features and dynamic content."
-				],
-				[
 					'enable_html_off_mode',
 					'',
 					'N',
@@ -149,6 +92,15 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'Turns off page caching for shortcodes',
 					"When enabled, 'Custom Content by Country' plugin will turn off page caching for pages that use these shortcodes."
 				],
+				[
+					'enable_amazon_associate',
+					'',
+					'N',
+					'checkbox',
+					'Amazon Associates',
+					'Enable Amazon Associates Feature',
+					"Provides the shortcode to use Amazon Associate links based on visitor's location."
+				],
 			]
 		];
 
@@ -161,7 +113,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'US Associate Tag',
-					'Specify your Amazon.com Associate Tag here:'
+					'Specify your Amazon.com Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_canada',
@@ -169,7 +122,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'Canada Associate Tag',
-					'Specify your Amazon.ca Associate Tag here:'
+					'Specify your Amazon.ca Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_uk',
@@ -177,7 +131,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'U.K. Associate Tag',
-					'Specify your Amazon.co.uk Associate Tag here:'
+					'Specify your Amazon.co.uk Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_france',
@@ -185,7 +140,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'France Associate Tag',
-					'Specify your Amazon.fr Associate Tag here:'
+					'Specify your Amazon.fr Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_germany',
@@ -193,7 +149,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'Germany Associate Tag',
-					'Specify your Amazon.de Associate Tag here:'
+					'Specify your Amazon.de Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_italy',
@@ -201,7 +158,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'Italy Associate Tag',
-					'Specify your Amazon.it Associate Tag here:'
+					'Specify your Amazon.it Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_spain',
@@ -209,7 +167,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'Spain Associate Tag',
-					'Specify your Amazon.es Associate Tag here:'
+					'Specify your Amazon.es Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_japan',
@@ -217,7 +176,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'Japan Associate Tag',
-					'Specify your Amazon.co.jp Associate Tag here:'
+					'Specify your Amazon.co.jp Associate Tag here:',
+					''
 				],
 				[
 					'afftag_amazon_region_china',
@@ -225,7 +185,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'',
 					'text',
 					'China Associate Tag',
-					'Specify your Amazon.cn Associate Tag here:'
+					'Specify your Amazon.cn Associate Tag here:',
+					''
 				],
 			]
 		];
@@ -239,26 +200,15 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 
 	/** BELOW IS SPECIFIC TO THIS PLUGIN **/
 	protected function handlePluginFormSubmit() {
-
-		if ( !$this->isWorpitPluginAdminPage() ) {
-			return;
-		}
-
-		//Was a worpit-cbc form submitted?
-		if ( !isset( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] ) ) {
-			return;
-		}
-
-		//Don't need to run isset() because previous function does this
-		switch ( $_GET[ 'page' ] ) {
-			case $this->getSubmenuId( 'main' ):
+		if ( $this->isWorpitPluginAdminPage() && isset( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] ) ) {
+			//Don't need to run isset() because previous function does this
+			if ( $_GET[ 'page' ] === $this->getSubmenuId( 'main' ) ) {
 				$this->handleSubmit_main();
-				return;
+			}
 		}
 	}
 
 	protected function handleSubmit_main() {
-		$this->m_fSubmitCbcMainAttempt = true;
 		$this->updatePluginOptionsFromSubmit( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] );
 	}
 
@@ -277,141 +227,19 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_EnableSection );
 		$sAllInputOptions .= ','.$this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_AffTagsSection );
 
-		$aData = [
+		$this->display( 'worpit_cbc_main', [
 			'plugin_url'        => $this->sPluginUrl,
 			'var_prefix'        => $this->oPluginVo->getOptionStoragePrefix(),
 			'aAllOptions'       => $aAvailableOptions,
 			'all_options_input' => $sAllInputOptions,
 			'form_action'       => 'admin.php?page='.$this->getFullParentMenuId().'-main'
-		];
-
-		$this->display( 'worpit_cbc_main', $aData );
-	}
-
-	private function installIp2NationsDb() {
-
-		if ( !current_user_can( 'manage_options' ) ) {
-			return;
-		}
-
-		//Is the install database request flag set and it is a SUBMIT?  INSTALL!
-		if ( isset( $_GET[ 'CBC_INSTALL_DB' ] ) && $_GET[ 'CBC_INSTALL_DB' ] == 'install' ) {
-			if ( isset( $_POST[ 'cbc_install' ] ) && $_POST[ 'cbc_install' ] == "1" ) {
-				$this->m_fIp2NationsDbInstallAttempt = true;    //used later for admin notices
-				$sSqlDir = trailingslashit( path_join( $this->oPluginVo->getRootDir(), 'inc/ip2nation' ) );
-				$this->m_fIp2NationsDbInstall = $this->importMysqlFile( $sSqlDir.'ip2nation.sql' );
-				$this->m_fIp2NationsDbInstall = $this->m_fIp2NationsDbInstall && $this->importMysqlFile( $sSqlDir.'ip2nationCountries.sql' );
-				$this->updateOption( $this->oPluginVo->getIp2NationsDbVersionKey(), $this->oPluginVo->getIp2NationsDbVersion() );
-			}
-			elseif ( isset( $_POST[ 'cbc_dismiss' ] ) ) {
-				$this->m_fIp2NationsDbInstallAttempt = false;    //used later for admin notices
-				$this->updateOption( $this->oPluginVo->getIp2NationsDbVersionKey(), $this->oPluginVo->getIp2NationsDbVersion() );
-			}
-		}
-	}
-
-	private function importMysqlFile( $sFilename ) {
-
-		if ( !file_exists( $sFilename ) ) {
-			return false;
-		}
-
-		$aSqlLines = file( $sFilename );
-		if ( !is_array( $aSqlLines ) ) {
-			return false;
-		}
-
-		$aSqlStartTerms = [ 'INSERT', 'UPDATE', 'DELETE', 'DROP', 'GRANT', 'REVOKE', 'CREATE', 'ALTER' ];
-		$aQueries = [];
-		$sNewQuery = '';
-		foreach ( $aSqlLines as $nKey => $sLine ) {
-			$sLine = trim( $sLine );
-			if ( empty( $sLine ) ) {
-				continue;
-			}
-			if ( preg_match( "/^(".implode( '|', $aSqlStartTerms ).")\s+/i", $sLine ) ) {
-
-				// commit the new query to the Query Set before processing the next
-				if ( !empty( $sNewQuery ) ) {
-					$aQueries[] = $sNewQuery;
-				}
-				$sNewQuery = $sLine;
-			}
-			else {
-				$sNewQuery .= ' '.$sLine;
-			}
-			unset( $aSqlLines[ $nKey ] );
-		}
-
-		if ( !empty( $sNewQuery ) ) {
-			$aQueries[] = $sNewQuery;
-		}
-		$this->executeQuerySet( $aQueries );
-
-		return true;
-	}
-
-	private function executeQuerySet( $aQueries ) {
-		global $wpdb;
-		foreach ( $aQueries as $nKey => $sQuery ) {
-			$wpdb->query( $sQuery );
-		}
-	}
-
-	private function adminNoticeIp2NationsDb() {
-
-		$sDbVersion = $this->getOption( $this->oPluginVo->getIp2NationsDbVersionKey() );
-		$sClass = 'updated';
-
-		if ( isset( $_GET[ 'show_cbcdb_install' ] ) || ( !isset( $_GET[ 'CBC_INSTALL_DB' ] ) && $sDbVersion !== $this->oPluginVo->getIp2NationsDbVersion() ) ) {
-			//At this stage, we've determined that the currently installed IP-2-Nation is non-existent or out of date.
-			$sNotice = '
-					<form method="post" action="index.php?CBC_INSTALL_DB=install" id="cbc_install_db">
-						<p><strong>The IP-2-Nations data needs to be updated/installed before you can use the <em>Content By Country</em> plugin.</strong>
-						<input type="hidden" value="0" name="cbc_install" id="cbc_install" >
-						<input type="submit" value="Click here to install now (it may take a few seconds - click only ONCE)"
-						name="cbc_submit" id="cbc_submit" class="button-primary" onclick="changeSubmitButton()">
-						<input type="submit" value="Dismiss this notice."
-						name="cbc_dismiss" id="cbc_dismiss" class="">
-						</p>
-					</form>
-					<script type="text/javascript">
-						function changeSubmitButton() {
-							var elemSubmit = jQuery("#cbc_submit");
-							elemSubmit.val("Please wait, attempting to install data. The page will reload when it finishes ...");
-							elemSubmit.attr("disabled", "disabled");
-							
-							var elemInstallFlag = jQuery("#cbc_install");
-							elemInstallFlag.val("1");
-							
-							var form = jQuery("#cbc_install_db").submit();
-						}
-					</script>
-			';
-			$this->getAdminNotice( $sNotice, $sClass, true );
-		}
-		elseif ( isset( $_GET[ 'CBC_INSTALL_DB' ] ) && $_GET[ 'CBC_INSTALL_DB' ] == 'install' && $this->m_fIp2NationsDbInstallAttempt ) {
-
-			if ( $this->m_fIp2NationsDbInstall ) {
-				$sNotice = '<p><strong>Success</strong>: The IP-2-Nations data was automatically installed successfully for the "Content By Country" plugin.</p>';
-				$this->getAdminNotice( $sNotice, $sClass, true );
-			}
-			else {
-				$sNotice = '<p>The IP-2-Nations data was <strong>NOT</strong> successfully installed. For perfomance reasons, only 1 attempt is ever made - you will have to do so manually.</p>';
-				$sClass = 'error';
-				$this->getAdminNotice( $sNotice, $sClass, true );
-			}
-		}
-		elseif ( isset( $_GET[ 'CBC_INSTALL_DB' ] ) && $_GET[ 'CBC_INSTALL_DB' ] == 'install' && isset( $_POST[ 'cbc_dismiss' ] ) ) {
-			$sNotice = '<p>The IP-2-Nations database may not have been updated, so you will need to do so manually if you have not already.</p>';
-			$this->getAdminNotice( $sNotice, $sClass, true );
-		}
+		] );
 	}
 
 	private function adminNoticeOptionsUpdated() {
 
 		//Admin notice for Main Options page submit.
-		if ( $this->m_fSubmitCbcMainAttempt ) {
+		if ( isset( $_GET[ 'ccbc_options_updated' ] ) ) {
 
 			if ( $this->m_fUpdateSuccessTracker ) {
 				$sNotice = '<p>Updating CBC Plugin Options was a <strong>Success</strong>.</p>';
@@ -457,7 +285,6 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 			$this->oProcessorGeoLocation
 				->setModeHtmlOff( $this->getOption( 'enable_html_off_mode' ) == 'Y' )
 				->setModeW3tcCompatibility( $this->getOption( 'enable_w3tc_compatibility_mode' ) == 'Y' )
-				->setModeDeveloper( $this->getOption( 'enable_developer_mode' ) === 'Y' )
 				->setWpOptionPrefix( $this->oPluginVo->getOptionStoragePrefix() );
 		}
 		return $this->oProcessorGeoLocation;

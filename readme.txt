@@ -1,11 +1,11 @@
 === Custom Content by Country (by Shield Security) ===
 Contributors: paultgoodchild
 Donate link: https://icwp.io/d9
-Tags: ip2nation, custom content, location, geolocation
+Tags: custom content, location, geolocation
 Requires at least: 3.2.0
 Tested up to: 6.0
 Requires PHP: 5.4
-Stable tag: 2.19
+Stable tag: 3.0.0
 
 == Description ==
 
@@ -28,7 +28,7 @@ To learn how to use the plugin, see the [comprehensive FAQ](http://wordpress.org
 
 = What options are available in the shortcode? =
 
-Currently there are 4 options/parameters: *country*, *show*, *message*, *html*
+Currently there are 4 options/parameters: *country*, *ip*, *show*, *message*, *html*
 
 country: a comma-separated list of country codes, e.g. country="us, es, uk"
 
@@ -141,18 +141,13 @@ If your local network address is defined as "Private" according to the database,
 
 This isn't fully tested and shouldn't be used as-is in production but it seems to hold up.  Feedback welcome.
 
-= Is there an option to remove the data that was added to the DB by the plugin? =
-
-Currently, no (but eventually, yes). You can do so manually by firing up your phpMyAdmin for your site and dropping the following 2 tables:
-
-ip2nation
-ip2nationCountries
-
 == Changelog ==
 
-= TODO =
+= 3.0.0 =
+*released 17th June 2022*
 
-* Add option to remove the ip2nations data from the database.
+* NEW:  Completely gutted the plugin and start using GeoIP DB locally.
+* NEW:  Final release to support PHP 5.x.
 
 = 2.19 =
 *released 17th June 2022*

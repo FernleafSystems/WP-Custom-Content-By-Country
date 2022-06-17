@@ -1,0 +1,32 @@
+{
+  "name":              "apto-ccbc/requirements",
+  "description":       "Custom Content By Country Requirements",
+  "authors":           [
+    {
+      "name":     "Paul Goodchild",
+      "email":    "paul@paulgoodchild.me",
+      "homepage": "https://paulgoodchild.me"
+    }
+  ],
+  "license":           "MIT",
+  "keywords":          [
+  ],
+  "config":            {
+    "platform": {
+      "php": "5.4"
+    }
+  },
+  "require":           {
+    "php":           ">=5.4",
+    "geoip2/geoip2": "*"
+  },
+  "require-dev":       {
+  },
+  "minimum-stability": "dev",
+  "prefer-stable":     true,
+  "autoload":          {
+    "psr-4": {
+      "FernleafSystems\\Wordpress\\Plugin\\CCBC\\": "src"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 <?php
 
+use FernleafSystems\Wordpress\Plugin\CCBC\GeoIP\RetrieveCountryForVisitor;
+
 class ICWP_CCBC_Processor_GeoLocation {
 
 	const CbcDataCountryNameCookie = 'cbc_country_name';
@@ -64,38 +66,29 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	/**
-	 * @param bool $fOn
+	 * @param string $prefix
 	 * @return $this
 	 */
-	public function setModeDeveloper( $fOn ) {
-		$this->fDeveloperMode = (bool)$fOn;
-		return $this;
-	}
-
-	/**
-	 * @param string $sPrefix
-	 * @return $this
-	 */
-	public function setWpOptionPrefix( $sPrefix ) {
-		$this->sWpOptionPrefix = (string)$sPrefix;
+	public function setWpOptionPrefix( $prefix ) {
+		$this->sWpOptionPrefix = (string)$prefix;
 		return $this;
 	}
 
 	public function initShortCodes() {
 
-		$aShortCodeMapping = [
-			'CBC'         => 'sc_printContentByCountry',
-			'CBC_COUNTRY' => 'sc_printVisitorCountryName',
-			'CBC_CODE'    => 'sc_printVisitorCountryCode',
-			'CBC_IP'      => 'sc_printVisitorIpAddress',
-			'CBC_AMAZON'  => 'sc_printAmazonLinkByCountry'
-			//			'CBC_HELP'		=>	'printHelp',
-		];
-
-		if ( function_exists( 'add_shortcode' ) && !empty( $aShortCodeMapping ) ) {
-			foreach ( $aShortCodeMapping as $sShortCode => $sCallbackFunction ) {
-				if ( is_callable( [ $this, $sCallbackFunction ] ) ) {
-					add_shortcode( $sShortCode, [ $this, $sCallbackFunction ] );
+		if ( function_exists( 'add_shortcode' ) ) {
+			foreach (
+				[
+					'CBC'         => [ $this, 'sc_printContentByCountry' ],
+					'CBC_COUNTRY' => [ $this, 'sc_printVisitorCountryName' ],
+					'CBC_CODE'    => [ $this, 'sc_printVisitorCountryCode' ],
+					'CBC_IP'      => [ $this, 'sc_printVisitorIpAddress' ],
+					'CBC_AMAZON'  => [ $this, 'sc_printAmazonLinkByCountry' ],
+					//			'CBC_HELP'  => [ $this, 'printHelp' ],
+				] as $shortcode => $callback
+			) {
+				if ( is_callable( $callback ) ) {
+					add_shortcode( $shortcode, $callback );
 				}
 			}
 		}
@@ -103,44 +96,37 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 	/**
 	 * The Shortcode function for CBC_AMAZON
-	 * @param array  $aAtts
+	 * @param array  $attributes
 	 * @param string $sContent
 	 * @return string
 	 */
-	public function sc_printAmazonLinkByCountry( $aAtts = [], $sContent = '' ) {
-		$aAtts = shortcode_atts(
+	public function sc_printAmazonLinkByCountry( $attributes = [], $sContent = '' ) {
+		$attributes = shortcode_atts(
 			[
 				'item'    => '',
 				'text'    => $sContent,
 				'asin'    => '',
 				'country' => '',
 			],
-			$aAtts
+			$attributes
 		);
 
-		if ( !empty( $aAtts[ 'asin' ] ) ) {
-			$sAsinToUse = $aAtts[ 'asin' ];
+		if ( !empty( $attributes[ 'asin' ] ) ) {
+			$sAsinToUse = $attributes[ 'asin' ];
 		}
 		else {
-			$aAtts[ 'item' ] = strtolower( $aAtts[ 'item' ] );
-
-			if ( array_key_exists( $aAtts[ 'item' ], $this->m_aPreselectedAffItems ) ) {
-				$sAsinToUse = $this->m_aPreselectedAffItems[ $aAtts[ 'item' ] ];
-			}
-			else {
-				return ''; //ASIN is undefined or the "item" does not exist.
-			}
+			return ''; //ASIN is undefined or the "item" does not exist.
 		}
 
-		if ( empty( $aAtts[ 'country' ] ) ) {
-			$sLink = $this->buildAffLinkFromAsinOnly( $sAsinToUse );
+		if ( empty( $attributes[ 'country' ] ) ) {
+			$href = $this->buildAffLinkFromAsinOnly( $sAsinToUse );
 		}
 		else {
-			$sLink = $this->buildAffLinkFromCountryCode( $sAsinToUse, $aAtts[ 'country' ] );
+			$href = $this->buildAffLinkFromCountryCode( $sAsinToUse, $attributes[ 'country' ] );
 		}
 
-		$sOutputText = '<a class="cbc_amazon_link" href="%s" target="_blank">%s</a>';
-		return sprintf( $sOutputText, $sLink, do_shortcode( $aAtts[ 'text' ] ) );
+		$output = '<a class="cbc_amazon_link" href="%s" target="_blank">%s</a>';
+		return sprintf( $output, $href, do_shortcode( $attributes[ 'text' ] ) );
 	}
 
 	/**
@@ -191,7 +177,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 					},
 					explode( ',', $params[ 'ip' ] )
 				);
-				$isVisitorMatched = in_array( $this->loadDataProcessor()->GetVisitorIpAddress( false ), $selectedIPs );
+				$isVisitorMatched = in_array( $this->loadDataProcessor()->GetVisitorIpAddress(), $selectedIPs );
 			}
 
 			$isShowVisitorContent = strtolower( $params[ 'show' ] ) != 'n'; // defaults to show content
@@ -209,26 +195,36 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function sc_printVisitorCountryCode( $params = [] ) {
-		$params = shortcode_atts( [ 'class' => 'cbc_countrycode' ], $params );
-		return $this->printShortCodeHtml( $params, $this->getVisitorCountryCode() );
+		$params = shortcode_atts(
+			[
+				'class' => 'cbc_countrycode',
+				'case'  => 'lower',
+			],
+			$params
+		);
+		$code = $this->getVisitorCountryCode();
+		if ( strtolower( $params[ 'case' ] ) === 'upper' ) {
+			$code = strtoupper( $code );
+		}
+		return $this->printShortCodeHtml( $params, $code );
 	}
 
 	/**
-	 * @param array $aParams
+	 * @param array $params
 	 * @return string
 	 */
-	public function sc_printVisitorCountryName( $aParams = [] ) {
-		$aParams = shortcode_atts( [ 'class' => 'cbc_country' ], $aParams );
-		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryName() );
+	public function sc_printVisitorCountryName( $params = [] ) {
+		$params = shortcode_atts( [ 'class' => 'cbc_country' ], $params );
+		return $this->printShortCodeHtml( $params, $this->getVisitorCountryName() );
 	}
 
 	/**
-	 * @param array $aParams
+	 * @param array $params
 	 * @return string
 	 */
-	public function sc_printVisitorIpAddress( $aParams = [] ) {
-		$aParams = shortcode_atts( [ 'class' => 'cbc_ip' ], $aParams );
-		return $this->printShortCodeHtml( $aParams, $this->loadDataProcessor()->GetVisitorIpAddress( false ) );
+	public function sc_printVisitorIpAddress( $params = [] ) {
+		$params = shortcode_atts( [ 'class' => 'cbc_ip' ], $params );
+		return $this->printShortCodeHtml( $params, $this->loadDataProcessor()->GetVisitorIpAddress() );
 	}
 
 	/**
@@ -264,111 +260,49 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function getVisitorCountryCode() {
-		$DP = $this->loadDataProcessor();
+		$code = 'us';
 
-		$theCode = 'us';  //defaults to US.
-
-		// Get the CloudFlare country if it's set
-		$cfCode = $DP->FetchServer( 'HTTP_CF_IPCOUNTRY' );
-		if ( !empty( $cfCode ) ) {
-			$theCode = $cfCode;
-		}
-		elseif ( !$this->fDeveloperMode ) {
-			// Use Cookies if developer mode is off.
-			$code = $DP->FetchCookie( self::CbcDataCountryCodeCookie );
-			if ( !empty( $code ) ) {
-				$theCode = $code;
-			}
-		}
-		elseif ( $DP->GetVisitorIpAddress( false ) == '127.0.0.1' ) {
-			$theCode = 'localhost';
+		if ( $this->loadDataProcessor()->GetVisitorIpAddress() == '127.0.0.1' ) {
+			$code = 'localhost';
 		}
 		else {
-			$data = $this->loadVisitorCountryData();
-			if ( !empty( $data->iso_code_2 ) ) {
-				$theCode = $data->iso_code_2;
+			try {
+				$code = $this->getMMCountry()->country->isoCode;
+			}
+			catch ( Exception $e ) {
 			}
 		}
 
-		return strtolower( (string)$theCode );
+		return empty( $code ) ? 'us' : strtolower( $code );
 	}
 
 	/**
-	 * @return null|string
+	 * @return \GeoIp2\Model\Country
+	 * @throws Exception
+	 */
+	public function getMMCountry() {
+		$pathToDB = path_join( \ICWP_CustomContentByCountry_Plugin::GetInstance()->getRootDir(),
+			'resources/MaxMind/GeoLite2-Country.mmdb' );
+		return ( new RetrieveCountryForVisitor( $pathToDB ) )
+			->lookupIP( $this->loadDataProcessor()->GetVisitorIpAddress() );
+	}
+
+	/**
+	 * @return string
 	 */
 	public function getVisitorCountryName() {
-
-		$oDp = $this->loadDataProcessor();
-
-		if ( $oDp->GetVisitorIpAddress( false ) == '127.0.0.1' ) {
-			return 'localhost';
+		$country = '';
+		if ( $this->loadDataProcessor()->GetVisitorIpAddress() == '127.0.0.1' ) {
+			$country = 'localhost';
 		}
-
-		if ( !$this->fDeveloperMode ) {
-			$sCookieCountry = $oDp->FetchCookie( self::CbcDataCountryNameCookie );
-			if ( !empty( $sCookieCountry ) ) {
-				return $sCookieCountry;
+		else {
+			try {
+				$country = $this->getMMCountry()->country->name;
+			}
+			catch ( Exception $e ) {
 			}
 		}
-
-		$oData = $this->loadVisitorCountryData();
-		if ( isset( $oData->country ) ) {
-			return $oData->country;
-		}
-		return null;
-	}
-
-	/**
-	 * @return object
-	 */
-	protected function loadVisitorCountryData() {
-
-		if ( isset( $this->oDbCountryData ) ) {
-			return $this->oDbCountryData;
-		}
-
-		$oDp = $this->loadDataProcessor();
-		$sIpAddress = $oDp->GetVisitorIpAddress( false );
-
-		$sSqlQuery = "
-			SELECT `c`.`country`, `c`.`code`, `c`.`iso_code_2`
-			FROM `ip2nationCountries` AS `c`
-			INNER JOIN ip2nation AS `i`
-				ON `c`.`code` = `i`.`country`
-			WHERE `i`.`ip` < INET_ATON( '%s' )
-			ORDER BY `i`.`ip` DESC
-			LIMIT 1
-		";
-		$sSqlQuery = sprintf( $sSqlQuery, $sIpAddress );
-
-		global $wpdb;
-		$this->oDbCountryData = $wpdb->get_row( $sSqlQuery );
-		return $this->oDbCountryData;
-	}
-
-	/**
-	 * @param object|null $oCountryData
-	 */
-	public function setCountryDataCookies( $oCountryData = null ) {
-
-		if ( is_null( $oCountryData ) ) {
-			$oCountryData = $this->loadVisitorCountryData();
-		}
-
-		$oDp = $this->loadDataProcessor();
-		$nTimeToExpire = $oDp->GetRequestTime() + DAY_IN_SECONDS;
-
-		//set the cookie for future reference if it hasn't been set yet.
-		if ( !$oDp->FetchCookie( self::CbcDataCountryNameCookie ) && isset( $oCountryData->country ) ) {
-			setcookie( self::CbcDataCountryNameCookie, $oCountryData->country, $nTimeToExpire, COOKIEPATH, COOKIE_DOMAIN, false );
-			$_COOKIE[ self::CbcDataCountryNameCookie ] = $oCountryData->country;
-		}
-
-		//set the cookie for future reference if it hasn't been set yet.
-		if ( !$oDp->FetchCookie( self::CbcDataCountryCodeCookie ) && isset( $oCountryData->code ) ) {
-			setcookie( self::CbcDataCountryCodeCookie, $oCountryData->code, $nTimeToExpire, COOKIEPATH, COOKIE_DOMAIN, false );
-			$_COOKIE[ self::CbcDataCountryCodeCookie ] = $oCountryData->code;
-		}
+		return empty( $country ) ? 'Unknown' : $country;
 	}
 
 	/**
@@ -415,8 +349,6 @@ class ICWP_CCBC_Processor_GeoLocation {
 		$aArgs[ $sAttrKey ] = empty( $sAttrValue ) ? '' : sprintf( ' %s="%s"', $sElement, $sAttrValue );
 	}
 
-	/**
-	 */
 	private function handleW3tcCompatibiltyMode() {
 		if ( $this->fW3tcCompatibilityMode && !defined( 'DONOTCACHEPAGE' ) ) {
 			define( 'DONOTCACHEPAGE', true );

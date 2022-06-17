@@ -1,94 +1,93 @@
 <?php
 
-function getIsHexColour($insColour) {
+function printOptionsPageHeader( $title = '' ) {
+	$sLinkedIcwp = '<a href="http://icwp.io/3a" target="_blank">iControlWP</a>';
+	echo '<div class="page-header">';
+	echo '<h2><a id="pluginlogo_32" class="header-icon32" href="http://icwp.io/2k" target="_blank"></a>';
+	$baseTitle = sprintf( 'Custom Content By Country (from %s)', $sLinkedIcwp );
+	if ( !empty( $title ) ) {
+		echo sprintf( '%s :: %s', $title, $baseTitle );
+	}
+	else {
+		echo $baseTitle;
+	}
+	echo '</h2></div>';
+}
+
+function getIsHexColour( $insColour ) {
 	return preg_match( '/^#[a-fA-F0-9]{3,6}$/', $insColour );
 }
 
-function printAllPluginOptionsForm( $inaAllPluginOptions, $insVarPrefix = '', $iOptionsPerRow = 1 ) {
-	
-	if ( empty($inaAllPluginOptions) ) {
+function printAllPluginOptionsForm( $allOptions, $prefix = '', $optsPerRow = 1 ) {
+
+	if ( empty( $allOptions ) ) {
 		return;
 	}
 
-	$iRowWidth = 8; //8 spans.
-	$iOptionWidth = $iRowWidth / $iOptionsPerRow;
+	$optionWidth = 8/$optsPerRow; //8 spans.
 
 	//Take each Options Section in turn
-	foreach ( $inaAllPluginOptions as $sOptionSection ) {
-		
-		$sRowId = str_replace( ' ', '', $sOptionSection['section_title'] );
+	foreach ( $allOptions as $optSection ) {
+
+		$sRowId = str_replace( ' ', '', $optSection[ 'section_title' ] );
 		//Print the Section Title
 		echo '
 				<div class="row" id="'.$sRowId.'">
 					<div class="span9" style="margin-left:0px">
 						<fieldset>
-							<legend>'.$sOptionSection['section_title'].'</legend>
+							<legend>'.$optSection[ 'section_title' ].'</legend>
 		';
-		
-		$rowCount = 1;
-		$iOptionCount = 0;
-		//Print each option in the option section
-		foreach ( $sOptionSection['section_options'] as $aOption ) {
-			
-			$iOptionCount = $iOptionCount % $iOptionsPerRow;
 
-			if ( $iOptionCount == 0 ) {
+		$rowCount = 1;
+		$optCount = 0;
+		//Print each option in the option section
+		foreach ( $optSection[ 'section_options' ] as $option ) {
+
+			$optCount = $optCount%$optsPerRow;
+
+			if ( $optCount == 0 ) {
 				echo '
 				<div class="row row_number_'.$rowCount.'">';
 			}
-			
-			echo getPluginOptionSpan( $aOption, $iOptionWidth, $insVarPrefix );
 
-			$iOptionCount++;
+			echo getPluginOptionSpan( $option, $optionWidth, $prefix );
 
-			if ( $iOptionCount == $iOptionsPerRow ) {
+			$optCount++;
+
+			if ( $optCount == $optsPerRow ) {
 				echo '
 				</div> <!-- / options row -->';
 				$rowCount++;
 			}
-	
 		}//foreach option
-	
+
 		echo '
 					</fieldset>
 				</div>
 			</div>
 		';
-		/*
-		//ensure the intermediate save button is not printed at the end.
-		end($inaAllPluginOptions);
-		$skey = key($inaAllPluginOptions);
-		if ( $sOptionSection['section_title'] != $skey ) {
-			echo '
-				<div class="form-actions">
-					<button type="submit" class="btn btn-primary" name="submit" '.($hlt_compiler_enabled ? '':' disabled').'>'. _hlt__( 'Save All Settings' ).'</button>
-				</div>
-			';
-		}
-		*/
+	}
+}
 
-	}//foreach section
+function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 
-}//printAllPluginOptionsForm
+	list( $optKey, $optSaved, $optDef, $optType, $optName, $optTitle, $optHelp ) = $option;
 
-function getPluginOptionSpan( $inaOption, $iSpanSize, $insVarPrefix = '' ) {
-	
-	list( $sOptionKey, $sOptionSaved, $sOptionDefault, $mOptionType, $sOptionHumanName, $sOptionTitle, $sOptionHelpText ) = $inaOption;
-	
-	if ( $sOptionKey == 'spacer' ) {
+	if ( $optKey == 'spacer' ) {
 		$sHtml = '
-			<div class="span'.$iSpanSize.'">
+			<div class="span'.$spanSize.'">
 			</div>
 		';
-	} else {
-	
-		$sSpanId = 'span_'.$insVarPrefix.$sOptionKey;
+	}
+	else {
+
+		$sSpanId = 'span_'.$varPrefix.$optKey;
 		$sHtml = '
-			<div class="span'.$iSpanSize.'" id="'.$sSpanId.'">
+			<div class="span'.$spanSize.'" id="'.$sSpanId.'">
 				<div class="control-group">
-					<label class="control-label" for="'.$insVarPrefix.$sOptionKey.'">'.$sOptionHumanName.'<br /></label>
+					<label class="control-label" for="'.$varPrefix.$optKey.'">'.$optName.'<br /></label>
 					<div class="controls">
-					  <div class="option_section'.( ($sOptionSaved == 'Y')? ' selected_item':'' ).'" id="option_section_'.$insVarPrefix.$sOptionKey.'">
+					  <div class="option_section'.( ( $optSaved == 'Y' ) ? ' selected_item' : '' ).'" id="option_section_'.$varPrefix.$optKey.'">
 						<label>
 		';
 		$sAdditionalClass = '';
@@ -96,110 +95,110 @@ function getPluginOptionSpan( $inaOption, $iSpanSize, $insVarPrefix = '' ) {
 		$sChecked = '';
 		$sHelpSection = '';
 
-		if ( $mOptionType === 'checkbox' ) {
-			
-			$sChecked = ( $sOptionSaved == 'Y' )? 'checked="checked"' : '';
-			
+		if ( $optType === 'checkbox' ) {
+
+			$sChecked = ( $optSaved == 'Y' ) ? 'checked="checked"' : '';
+
 			$sHtml .= '
 				<input '.$sChecked.'
 						type="checkbox"
-						name="'.$insVarPrefix.$sOptionKey.'"
+						name="'.$varPrefix.$optKey.'"
 						value="Y"
 						class="'.$sAdditionalClass.'"
-						id="'.$insVarPrefix.$sOptionKey.'" />
-						'.$sOptionTitle;
-			
-			$sOptionHelpText = '<p class="help-block">'.$sOptionHelpText.'</p>';
+						id="'.$varPrefix.$optKey.'" />
+						'.$optTitle;
 
-		} else if ( $mOptionType === 'text' ) {
-			$sTextInput = esc_attr( $sOptionSaved );
+			$optHelp = '<p class="help-block">'.$optHelp.'</p>';
+		}
+		elseif ( $optType === 'text' ) {
+			$sTextInput = esc_attr( $optSaved );
 			$sHtml .= '
-				<p>'.$sOptionTitle.'</p>
+				<p>'.$optTitle.'</p>
 				<input type="text"
-						name="'.$insVarPrefix.$sOptionKey.'"
+						name="'.$varPrefix.$optKey.'"
 						value="'.$sTextInput.'"
 						placeholder="'.$sTextInput.'"
-						id="'.$insVarPrefix.$sOptionKey.'" />';
-			
-			$sOptionHelpText = '<p class="help-block">'.$sOptionHelpText.'</p>';
-			
-		} else if ( is_array($mOptionType) ) { //it's a select, or radio
-			
-			$sInputType = array_shift($mOptionType);
+						id="'.$varPrefix.$optKey.'" />';
+
+			$optHelp = '<p class="help-block">'.$optHelp.'</p>';
+		}
+		elseif ( is_array( $optType ) ) { //it's a select, or radio
+
+			$sInputType = array_shift( $optType );
 
 			if ( $sInputType == 'select' ) {
-				$sHtml .= '<p>'.$sOptionTitle.'</p>
-				<select id="'.$insVarPrefix.$sOptionKey.'" name="'.$insVarPrefix.$sOptionKey.'">';
+				$sHtml .= '<p>'.$optTitle.'</p>
+				<select id="'.$varPrefix.$optKey.'" name="'.$varPrefix.$optKey.'">';
 			}
-			
-			foreach( $mOptionType as $aInput ) {
-				
+
+			foreach ( $optType as $aInput ) {
+
 				$sHtml .= '
-					<option value="'.$aInput[0].'" id="'.$insVarPrefix.$sOptionKey.'_'.$aInput[0].'"' . (( $sOptionSaved == $aInput[0] )? ' selected="selected"' : '') .'>'. $aInput[1].'</option>';
+					<option value="'.$aInput[ 0 ].'" id="'.$varPrefix.$optKey.'_'.$aInput[ 0 ].'"'.( ( $optSaved == $aInput[ 0 ] ) ? ' selected="selected"' : '' ).'>'.$aInput[ 1 ].'</option>';
 			}
-			
-			if ($sInputType == 'select') {
+
+			if ( $sInputType == 'select' ) {
 				$sHtml .= '
 				</select>';
 			}
-			
-			$sOptionHelpText = '<p class="help-block">'.$sOptionHelpText.'</p>';
 
-		} else if ( strpos( $mOptionType, 'less_' ) === 0 ) {	//dealing with the LESS compiler options class_exists(HLT_BootstrapLess) is implied
+			$optHelp = '<p class="help-block">'.$optHelp.'</p>';
+		}
+		elseif ( strpos( $optType, 'less_' ) === 0 ) {    //dealing with the LESS compiler options class_exists(HLT_BootstrapLess) is implied
 
-			if ( empty($sOptionSaved) ) {
-				$sOptionSaved = $sOptionDefault;
+			if ( empty( $optSaved ) ) {
+				$optSaved = $optDef;
 			}
-			
+
 			$sHtml .= '<input class="span2'.$sAdditionalClass.'"
 						type="text"
-						placeholder="'.esc_attr( $sOptionSaved ).'"
-						name="'.$insVarPrefix.$sOptionKey.'"
-						value="'.esc_attr( $sOptionSaved ).'"
-						id="'.$insVarPrefix.$sOptionKey.'" />';
-			
+						placeholder="'.esc_attr( $optSaved ).'"
+						name="'.$varPrefix.$optKey.'"
+						value="'.esc_attr( $optSaved ).'"
+						id="'.$varPrefix.$optKey.'" />';
+
 			$sToggleTextInput = '';
-			
-			if ( $mOptionType === 'less_color' ) {
-				
-				if ( !getIsHexColour( $sOptionSaved ) ) {
+
+			if ( $optType === 'less_color' ) {
+
+				if ( !getIsHexColour( $optSaved ) ) {
 					$sChecked = ' checked';
 				}
-				
-				$sToggleTextInput= '
+
+				$sToggleTextInput = '
 							<span class="toggle_checkbox">
 							  <label>
 								<input type="checkbox"
-									name="hlt_toggle_'.$sOptionKey.'"
-									id="hlt_toggle_'.$sOptionKey.'" '.$sChecked.'
+									name="hlt_toggle_'.$optKey.'"
+									id="hlt_toggle_'.$optKey.'" '.$sChecked.'
 									style="vertical-align: -2px;" /> edit as text
 							  </label>
 							</span>';
-				
-			} else if ( $mOptionType === 'less_size' || $mOptionType === 'less_font' ) {
 			}
-			
+			elseif ( $optType === 'less_size' || $optType === 'less_font' ) {
+			}
+
 			$sHelpSection = '
 					<div class="help_section">
-						<span class="label label-less-name">@'.str_replace( HLT_BootstrapLess::$LESS_PREFIX, '', $sOptionKey ).'</span>
+						<span class="label label-less-name">@'.str_replace( HLT_BootstrapLess::$LESS_PREFIX, '', $optKey ).'</span>
 						'.$sToggleTextInput.'
-						<span class="label label-less-name">'.$sOptionDefault.'</span>
+						<span class="label label-less-name">'.$optDef.'</span>
 					</div>';
-			
-		} else {
+		}
+		else {
 			echo 'we should never reach this point';
 		}
-		
+
 		$sHtml .= '
 						</label>
-						'.$sOptionHelpText.'
+						'.$optHelp.'
 					  </div>
 					</div><!-- controls -->'
-					.$sHelpSection.'
+				  .$sHelpSection.'
 				</div><!-- control-group -->
 			</div>
 		';
 	}
-	
+
 	return $sHtml;
 }//getPluginOptionSpan
