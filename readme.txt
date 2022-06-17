@@ -1,15 +1,15 @@
-=== Custom Content by Country (by One Dollar Plugin) ===
-Contributors: paultgoodchild, onedollarplugin
+=== Custom Content by Country (by Shield Security) ===
+Contributors: paultgoodchild
 Donate link: https://icwp.io/d9
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 5.4
+Tested up to: 6.0
 Requires PHP: 5.4
-Stable tag: 2.18.200520
+Stable tag: 2.19
 
 == Description ==
 
-Custom Content by Country from [Multiple WordPress Security Manager](http://icwp.io/5z "iControlWP: Multiple WordPress Security Manager")
+Custom Content by Country from the team behind [Shield Security](http://icwp.io/kx "Shield Security")
 offers you the option to show/hide content to users based on their location (where provided).
 
 With a simple shortcode you can specify, using a list of country codes whether to
@@ -46,9 +46,19 @@ To show the text "abcdefg" ONLY to visitors from the US and France, I would use 
 
 [CBC country="us, fr" show="y"]abcdefg[/CBC]
 
-To then hide the text "mnopqrst" ONLY from visitors in Spain, I would use the following shortcode:
+To then hide the text "mnopqrst" ONLY from visitors in Spain, use the following shortcode:
 
 [CBC country="es" show="n"]mnopqrst[/CBC]
+
+= Can I filter for IP addresses instead of countries? =
+
+Yes, instead of using the `country` field, use `ip` instead. e.g.
+
+[CBC ip="1.2.3.4" show="y"]mnopqrst[/CBC]
+
+Note 1: If you have "country" field supplied, it'll never consider IP addresses. So make sure to remove the country field.
+
+Note 2: The plugin makes  attempt to verify the correct visitor IP address. This is up to you and your web hosting provider to ensure it's valid.
 
 = What happens if I leave out the option "show"? =
 
@@ -118,6 +128,8 @@ the W3 Total Cache plugin for more info.
 
 = Do you make any other plugins? =
 
+We created the [Shield Security](http://icwp.io/kx "Shield Security") plugin for people who want better WP Security.
+
 We also created the [Manage Multiple WordPress Site Better Tool: iControlWP](http://icwp.io/60) for people with multiple WordPress sites to manage.
 
 Yes, we created the only [Twitter Bootstrap WordPress](http://icwp.io/61 "Twitter Bootstrap WordPress Plugin")
@@ -141,6 +153,11 @@ ip2nationCountries
 = TODO =
 
 * Add option to remove the ip2nations data from the database.
+
+= 2.19 =
+*released 17th June 2022*
+
+* NEW:  Added support for using IP addresses instead of just country codes.
 
 = 2.18.200520 =
 *released 21st June 2020*
