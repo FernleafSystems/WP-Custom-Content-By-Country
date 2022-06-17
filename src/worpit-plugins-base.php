@@ -1,18 +1,19 @@
 <?php
 
-include_once( dirname(__FILE__).'/icwp-wpfunctions.php' );
+include_once( dirname( __FILE__ ).'/icwp-wpfunctions.php' );
 
 class ICWP_Plugins_Base_CBC {
 
-	const ParentTitle		= 'Worpit';
-	const ParentName		= 'Custom Content';
-	const ParentMenuId		= 'worpit';
-	const VariablePrefix	= 'worpit';
+	const ParentTitle = 'Worpit';
+	const ParentName = 'Custom Content';
+	const ParentMenuId = 'worpit';
+	const VariablePrefix = 'worpit';
 
 	/**
 	 * @var string
 	 */
 	protected $sPluginBaseFile;
+
 	/**
 	 * @var string
 	 */
@@ -23,34 +24,36 @@ class ICWP_Plugins_Base_CBC {
 	 */
 	protected $oPluginVo;
 
-	const ViewDir			= 'views';
+	const ViewDir = 'views';
 
 	protected $m_aPluginMenu;
 
 	protected $m_aAllPluginOptions;
-	
+
 	protected $m_fUpdateSuccessTracker;
+
 	protected $m_aFailedUpdateOptions;
 
 	public function __construct( ICWP_CustomContentByCountry_Plugin $oPluginVo ) {
 
-		$this->oPluginVo				= $oPluginVo;
+		$this->oPluginVo = $oPluginVo;
 
-		add_action( 'plugins_loaded', array( $this, 'onWpPluginsLoaded' ) );
-		add_action( 'init', array( $this, 'onWpInit' ), 1 );
+		add_action( 'plugins_loaded', [ $this, 'onWpPluginsLoaded' ] );
+		add_action( 'init', [ $this, 'onWpInit' ], 1 );
+		add_action( 'init', [ $this, 'onWpLoaded' ], 1 );
 		if ( is_admin() ) {
-			add_action( 'admin_init', array( $this, 'onWpAdminInit' ) );
-			add_action( 'admin_notices', array( $this, 'onWpAdminNotices' ) );
-			add_action( 'admin_menu', array( $this, 'onWpAdminMenu' ) );
-			add_action( 'plugin_action_links', array( $this, 'onWpPluginActionLinks' ), 10, 4 );
+			add_action( 'admin_init', [ $this, 'onWpAdminInit' ] );
+			add_action( 'admin_notices', [ $this, 'onWpAdminNotices' ] );
+			add_action( 'admin_menu', [ $this, 'onWpAdminMenu' ] );
+			add_action( 'plugin_action_links', [ $this, 'onWpPluginActionLinks' ], 10, 4 );
 		}
-		add_filter( 'auto_update_plugin',		array( $this, 'onWpAutoUpdatePlugin' ), 1000, 2 );
+		add_filter( 'auto_update_plugin', [ $this, 'onWpAutoUpdatePlugin' ], 1000, 2 );
 		/**
 		 * We make the assumption that all settings updates are successful until told otherwise
 		 * by an actual failing update_option call.
 		 */
 		$this->m_fUpdateSuccessTracker = true;
-		$this->m_aFailedUpdateOptions = array();
+		$this->m_aFailedUpdateOptions = [];
 	}
 
 	/**
@@ -60,7 +63,7 @@ class ICWP_Plugins_Base_CBC {
 	 */
 	public function getPluginBaseFile() {
 		if ( !isset( $this->sPluginBaseFile ) ) {
-			$this->sPluginBaseFile	= plugin_basename( $this->oPluginVo->getRootFile() );
+			$this->sPluginBaseFile = plugin_basename( $this->oPluginVo->getRootFile() );
 		}
 		return $this->sPluginBaseFile;
 	}
@@ -77,13 +80,13 @@ class ICWP_Plugins_Base_CBC {
 
 	/**
 	 * @param boolean $fUpdate
-	 * @param $oPluginInfo
+	 * @param         $oPluginInfo
 	 * @return bool
 	 */
 	public function onWpAutoUpdatePlugin( $fUpdate, $oPluginInfo ) {
 
 		// Only supports WordPress 3.8.2+
-		if ( !is_object( $oPluginInfo ) || !isset( $oPluginInfo->new_version ) || !isset( $oPluginInfo->plugin ) )  {
+		if ( !is_object( $oPluginInfo ) || !isset( $oPluginInfo->new_version ) || !isset( $oPluginInfo->plugin ) ) {
 			return $fUpdate;
 		}
 
@@ -91,16 +94,16 @@ class ICWP_Plugins_Base_CBC {
 			$aCurrentParts = explode( '-', $this->oPluginVo->getVersion(), 2 );
 			$aUpdateParts = explode( '-', $oPluginInfo->new_version, 2 );
 			// We only return true (i.e. update if and when the update is a minor version
-			return ( $aUpdateParts[0] === $aCurrentParts[0] );
+			return ( $aUpdateParts[ 0 ] === $aCurrentParts[ 0 ] );
 		}
 		return $fUpdate;
 	}
 
 	protected function getFullParentMenuId() {
-		return self::ParentMenuId .'-'. $this->oPluginVo->getPluginSlug();
+		return self::ParentMenuId.'-'.$this->oPluginVo->getPluginSlug();
 	}
 
-	protected function display( $insView, $inaData = array() ) {
+	protected function display( $insView, $inaData = [] ) {
 		$sFile = $this->oPluginVo->getViewDir().$insView.'.php';
 
 		if ( !is_file( $sFile ) ) {
@@ -121,21 +124,24 @@ class ICWP_Plugins_Base_CBC {
 		return true;
 	}
 
-	protected function getImageUrl( $insImage ) {
-		return $this->sPluginUrl.'resources/images/'.$insImage;
-	}
-	protected function getCssUrl( $insCss ) {
-		return $this->sPluginUrl.'resources/css/'.$insCss;
-	}
-	protected function getJsUrl( $insJs ) {
-		return $this->sPluginUrl.'resources/js/'.$insJs;
+	protected function getImageUrl( $img ) {
+		return $this->sPluginUrl.'resources/images/'.$img;
 	}
 
-	protected function getSubmenuPageTitle( $insTitle ) {
-		return self::ParentTitle.' - '.$insTitle;
+	protected function getCssUrl( $css ) {
+		return $this->sPluginUrl.'resources/css/'.$css;
 	}
-	protected function getSubmenuId( $insId ) {
-		return $this->getFullParentMenuId().'-'.$insId;
+
+	protected function getJsUrl( $js ) {
+		return $this->sPluginUrl.'resources/js/'.$js;
+	}
+
+	protected function getSubmenuPageTitle( $title ) {
+		return self::ParentTitle.' - '.$title;
+	}
+
+	protected function getSubmenuId( $ID ) {
+		return $this->getFullParentMenuId().'-'.$ID;
 	}
 
 	public function onWpPluginsLoaded() {
@@ -151,7 +157,11 @@ class ICWP_Plugins_Base_CBC {
 		}
 	}
 
-	public function onWpInit() { }
+	public function onWpInit() {
+	}
+
+	public function onWpLoaded() {
+	}
 
 	public function onWpAdminInit() {
 
@@ -162,29 +172,33 @@ class ICWP_Plugins_Base_CBC {
 			$this->enqueueBootstrapAdminCss();
 			$this->enqueuePluginAdminCss();
 		}
-
 	}
 
 	public function onWpAdminMenu() {
 
 		$sFullParentMenuId = $this->getFullParentMenuId();
 
-		add_menu_page( self::ParentTitle, self::ParentName, $this->oPluginVo->getBasePermissions(), $sFullParentMenuId, array( $this, 'onDisplayMainMenu' ), $this->getImageUrl( 'worpit_16x16.png' ) );
+		add_menu_page( self::ParentTitle, self::ParentName, $this->oPluginVo->getBasePermissions(), $sFullParentMenuId, [
+			$this,
+			'onDisplayMainMenu'
+		], $this->getImageUrl( 'worpit_16x16.png' ) );
 
 		//Create and Add the submenu items
 		$this->createPluginSubMenuItems();
-		if ( !empty($this->m_aPluginMenu) ) {
+		if ( !empty( $this->m_aPluginMenu ) ) {
 			foreach ( $this->m_aPluginMenu as $sMenuTitle => $aMenu ) {
 				list( $sMenuItemText, $sMenuItemId, $sMenuCallBack ) = $aMenu;
-				add_submenu_page( $sFullParentMenuId, $sMenuTitle, $sMenuItemText, $this->oPluginVo->getBasePermissions(), $sMenuItemId, array( $this, $sMenuCallBack ) );
+				add_submenu_page( $sFullParentMenuId, $sMenuTitle, $sMenuItemText, $this->oPluginVo->getBasePermissions(), $sMenuItemId, [
+					$this,
+					$sMenuCallBack
+				] );
 			}
 		}
 
 		$this->fixSubmenu();
-
 	}//onWpAdminMenu
 
-	protected function createPluginSubMenuItems(){
+	protected function createPluginSubMenuItems() {
 		/* Override to create array of sub-menu items
 		 $this->m_aPluginMenu = array(
 		 		//Menu Page Title => Menu Item name, page ID (slug), callback function onLoad.
@@ -196,8 +210,8 @@ class ICWP_Plugins_Base_CBC {
 	protected function fixSubmenu() {
 		global $submenu;
 		$sFullParentMenuId = $this->getFullParentMenuId();
-		if ( isset( $submenu[$sFullParentMenuId] ) ) {
-			$submenu[$sFullParentMenuId][0][0] = 'Dashboard';
+		if ( isset( $submenu[ $sFullParentMenuId ] ) ) {
+			$submenu[ $sFullParentMenuId ][ 0 ][ 0 ] = 'Dashboard';
 		}
 	}
 
@@ -205,19 +219,19 @@ class ICWP_Plugins_Base_CBC {
 	 * The callback function for the main admin menu index page
 	 */
 	public function onDisplayMainMenu() {
-		$aData = array( 'plugin_url' => $this->sPluginUrl );
+		$aData = [ 'plugin_url' => $this->sPluginUrl ];
 		$this->display( 'worpit_'.$this->oPluginVo->getPluginSlug().'_index', $aData );
 	}
 
 	/**
 	 * The Action Links in the main plugins page. Defaults to link to the main Dashboard page
-	 * 
+	 *
 	 * @param $aActionLinks
 	 * @param $sPluginFile
 	 */
 	public function onWpPluginActionLinks( $aActionLinks, $sPluginFile ) {
 		if ( $sPluginFile == $this->getPluginBaseFile() ) {
-			$sSettingsLink = sprintf( '<a href="%s">%s</a>', admin_url( "admin.php" ).'?page='.$this->getFullParentMenuId(), 'Settings' ); ;
+			$sSettingsLink = sprintf( '<a href="%s">%s</a>', admin_url( "admin.php" ).'?page='.$this->getFullParentMenuId(), 'Settings' );;
 			array_unshift( $aActionLinks, $sSettingsLink );
 		}
 		return $aActionLinks;
@@ -226,34 +240,37 @@ class ICWP_Plugins_Base_CBC {
 	/**
 	 * Override this method to handle all the admin notices
 	 */
-	public function onWpAdminNotices() { }
+	public function onWpAdminNotices() {
+	}
 
 	/**
 	 * This is called from within onWpAdminInit. Use this solely to manage upgrades of the plugin
 	 */
-	protected function handlePluginUpgrade() { }
+	protected function handlePluginUpgrade() {
+	}
 
-	protected function handlePluginFormSubmit() { }
+	protected function handlePluginFormSubmit() {
+	}
 
 	protected function enqueueBootstrapAdminCss() {
-		wp_register_style( 'worpit_bootstrap_wpadmin_css', $this->getCssUrl('bootstrap-wpadmin.css'), false, $this->oPluginVo->getVersion() );
+		wp_register_style( 'worpit_bootstrap_wpadmin_css', $this->getCssUrl( 'bootstrap-wpadmin.css' ), false, $this->oPluginVo->getVersion() );
 		wp_enqueue_style( 'worpit_bootstrap_wpadmin_css' );
-		wp_register_style( 'worpit_bootstrap_wpadmin_css_fixes',  $this->getCssUrl('bootstrap-wpadmin-fixes.css'), 'worpit_bootstrap_wpadmin_css', $this->oPluginVo->getVersion() );
+		wp_register_style( 'worpit_bootstrap_wpadmin_css_fixes', $this->getCssUrl( 'bootstrap-wpadmin-fixes.css' ), 'worpit_bootstrap_wpadmin_css', $this->oPluginVo->getVersion() );
 		wp_enqueue_style( 'worpit_bootstrap_wpadmin_css_fixes' );
 	}
 
 	protected function enqueuePluginAdminCss() {
 		$iRand = rand();
-		wp_register_style( 'icwp_plugin_css'.$iRand, $this->getCssUrl('plugin.css'), false, $this->oPluginVo->getVersion() );
+		wp_register_style( 'icwp_plugin_css'.$iRand, $this->getCssUrl( 'plugin.css' ), false, $this->oPluginVo->getVersion() );
 		wp_enqueue_style( 'icwp_plugin_css'.$iRand );
 	}
-	
+
 	/**
 	 * Provides the basic HTML template for printing a WordPress Admin Notices
 	 *
-	 * @param $insNotice - The message to be displayed.
+	 * @param $insNotice       - The message to be displayed.
 	 * @param $insMessageClass - either error or updated
-	 * @param $infPrint - if true, will echo. false will return the string
+	 * @param $infPrint        - if true, will echo. false will return the string
 	 * @return boolean|string
 	 */
 	protected function getAdminNotice( $insNotice = '', $insMessageClass = 'updated', $infPrint = false ) {
@@ -270,7 +287,8 @@ class ICWP_Plugins_Base_CBC {
 		if ( $infPrint ) {
 			echo $sFullNotice;
 			return true;
-		} else {
+		}
+		else {
 			return $sFullNotice;
 		}
 	}
@@ -281,7 +299,7 @@ class ICWP_Plugins_Base_CBC {
 				function redirect() {
 					window.location = "'.$insUrl.'";
 				}
-				var oTimer = setTimeout( "redirect()", "'.($innTimeout * 1000).'" );
+				var oTimer = setTimeout( "redirect()", "'.( $innTimeout*1000 ).'" );
 			</script>';
 	}
 
@@ -295,7 +313,7 @@ class ICWP_Plugins_Base_CBC {
 
 	/**
 	 * Override to create the plugin options array.
-	 * 
+	 *
 	 * Returns false if nothing happens - i.e. not over-rided.
 	 */
 	protected function initPluginOptions() {
@@ -304,19 +322,19 @@ class ICWP_Plugins_Base_CBC {
 
 	/**
 	 * Reads the current value for ALL plugin option from the WP options db.
-	 * 
+	 *
 	 * Assumes the standard plugin options array structure. Over-ride to change.
-	 * 
+	 *
 	 * NOT automatically executed on any hooks.
 	 */
 	protected function populateAllPluginOptions() {
 
-		if ( empty($this->m_aAllPluginOptions) && !$this->initPluginOptions() ) {
+		if ( empty( $this->m_aAllPluginOptions ) && !$this->initPluginOptions() ) {
 			return;
 		}
 
 		foreach ( $this->m_aAllPluginOptions as &$aOptionsSection ) {
-			$this->populatePluginOptionsSection($aOptionsSection);
+			$this->populatePluginOptionsSection( $aOptionsSection );
 		}
 	}//populateAllPluginOptions
 
@@ -329,88 +347,89 @@ class ICWP_Plugins_Base_CBC {
 	 */
 	protected function populatePluginOptionsSection( &$inaOptionsSection ) {
 
-		if ( empty($inaOptionsSection) ) {
+		if ( empty( $inaOptionsSection ) ) {
 			return;
 		}
 
-		foreach ( $inaOptionsSection['section_options'] as &$aOptionParams ) {
+		foreach ( $inaOptionsSection[ 'section_options' ] as &$aOptionParams ) {
 
 			list( $sOptionKey, $sOptionCurrent, $sOptionDefault ) = $aOptionParams;
 			$sCurrentOptionVal = $this->getOption( $sOptionKey );
-			$aOptionParams[1] = ($sCurrentOptionVal == '' )? $sOptionDefault : $sCurrentOptionVal;
+			$aOptionParams[ 1 ] = ( $sCurrentOptionVal == '' ) ? $sOptionDefault : $sCurrentOptionVal;
 		}
 	}
 
 	/**
-	 * @param $sAllOptionsInput a comma separated list of all the input keys to be processed from the $_POST
+	 * @param $sAllOptionsInput - comma separated list of all the input keys to be processed from the $_POST
 	 * @return bool
 	 */
 	protected function updatePluginOptionsFromSubmit( $sAllOptionsInput ) {
 
-		if ( empty($sAllOptionsInput) ) {
+		if ( empty( $sAllOptionsInput ) ) {
 			return true;
 		}
 
-		$aAllInputOptions = explode( ',', $sAllOptionsInput);
+		$aAllInputOptions = explode( ',', $sAllOptionsInput );
 		foreach ( $aAllInputOptions as $sInputKey ) {
 			$aInput = explode( ':', $sInputKey );
 			list( $sOptionType, $sOptionKey ) = $aInput;
-			
+
 			$sOptionValue = $this->getAnswerFromPost( $sOptionKey );
-			if ( is_null($sOptionValue) ) {
-				
+			if ( is_null( $sOptionValue ) ) {
+
 				if ( $sOptionType == 'text' ) { //if it was a text box, and it's null, don't update anything
 					continue;
-				} else if ( $sOptionType == 'checkbox' ) { //if it was a checkbox, and it's null, it means 'N'
+				}
+				elseif ( $sOptionType == 'checkbox' ) { //if it was a checkbox, and it's null, it means 'N'
 					$sOptionValue = 'N';
 				}
-				
 			}
 			$this->updateOption( $sOptionKey, $sOptionValue );
 		}
 		return true;
 	}
-	
-	protected function collateAllFormInputsForAllOptions($aAllOptions, $sInputSeparator = ',') {
 
-		if ( empty($aAllOptions) ) {
+	protected function collateAllFormInputsForAllOptions( $aAllOptions, $sInputSeparator = ',' ) {
+
+		if ( empty( $aAllOptions ) ) {
 			return '';
 		}
 		$iCount = 0;
 		$sCollated = '';
 		foreach ( $aAllOptions as $aOptionsSection ) {
-			
+
 			if ( $iCount == 0 ) {
-				$sCollated = $this->collateAllFormInputsForOptionsSection($aOptionsSection, $sInputSeparator);
-			} else {
-				$sCollated .= $sInputSeparator.$this->collateAllFormInputsForOptionsSection($aOptionsSection, $sInputSeparator);
+				$sCollated = $this->collateAllFormInputsForOptionsSection( $aOptionsSection, $sInputSeparator );
+			}
+			else {
+				$sCollated .= $sInputSeparator.$this->collateAllFormInputsForOptionsSection( $aOptionsSection, $sInputSeparator );
 			}
 			$iCount++;
 		}
 		return $sCollated;
-		
 	}
 
 	/**
 	 * Returns a comma seperated list of all the options in a given options section.
-	 * @param $aOptionsSection
+	 * @param        $aOptionsSection
 	 * @param string $sInputSeparator
 	 * @return string
 	 */
 	protected function collateAllFormInputsForOptionsSection( $aOptionsSection, $sInputSeparator = ',' ) {
 
-		if ( empty($aOptionsSection) ) {
+		if ( empty( $aOptionsSection ) ) {
 			return '';
 		}
 		$iCount = 0;
 		$sCollated = '';
-		foreach ( $aOptionsSection['section_options'] as $aOption ) {
+		foreach ( $aOptionsSection[ 'section_options' ] as $aOption ) {
 
-			list($sKey, $fill1, $fill2, $sType) =  $aOption;
-			
+			list( $sKey, $fill1, $fill2, $sType ) = $aOption;
+
 			if ( $iCount == 0 ) {
 				$sCollated = $sType.':'.$sKey;
-			} else {
+			}
+			else {
 				$sCollated .= $sInputSeparator.$sType.':'.$sKey;
 			}
 			$iCount++;
@@ -420,43 +439,41 @@ class ICWP_Plugins_Base_CBC {
 
 	protected function isWorpitPluginAdminPage() {
 
-		$sSubPageNow = isset( $_GET['page'] )? $_GET['page']: '';
-		if ( is_admin() && !empty($sSubPageNow) && (strpos( $sSubPageNow, $this->getFullParentMenuId() ) === 0 )) { //admin area, and the 'page' begins with 'worpit'
+		$sSubPageNow = isset( $_GET[ 'page' ] ) ? $_GET[ 'page' ] : '';
+		if ( is_admin() && !empty( $sSubPageNow ) && ( strpos( $sSubPageNow, $this->getFullParentMenuId() ) === 0 ) ) { //admin area, and the 'page' begins with 'worpit'
 			return true;
 		}
 
 		return false;
-	}//isWorpitPluginAdminPage
-	
+	}
+
 	protected function deleteAllPluginDbOptions() {
 
-		if ( !current_user_can( 'manage_options' ) ) {
-			return;
-		}
-		
-		if ( empty($this->m_aAllPluginOptions) && !$this->initPluginOptions() ) {
-			return;
-		}
+		if ( current_user_can( 'manage_options' ) ) {
 
-		foreach ( $this->m_aAllPluginOptions as &$aOptionsSection ) {
-			foreach ( $aOptionsSection['section_options'] as &$aOptionParams ) {
-				if ( isset( $aOptionParams[0] ) ) {
-					$this->deleteOption($aOptionParams[0]);
+			if ( empty( $this->m_aAllPluginOptions ) && !$this->initPluginOptions() ) {
+				return;
+			}
+
+			foreach ( $this->m_aAllPluginOptions as &$aOptionsSection ) {
+				foreach ( $aOptionsSection[ 'section_options' ] as &$aOptionParams ) {
+					if ( isset( $aOptionParams[ 0 ] ) ) {
+						$this->deleteOption( $aOptionParams[ 0 ] );
+					}
 				}
 			}
 		}
-		
-	}//deleteAllPluginDbOptions
+	}
 
 	protected function getAnswerFromPost( $insKey, $insPrefix = null ) {
 		if ( is_null( $insPrefix ) ) {
 			$insKey = $this->oPluginVo->getOptionStoragePrefix().$insKey;
 		}
-		return ( isset( $_POST[$insKey] )? $_POST[$insKey]: 'N' );
+		return ( isset( $_POST[ $insKey ] ) ? $_POST[ $insKey ] : 'N' );
 	}
 
 	/**
-	 * @param $sOptionName
+	 * @param       $sOptionName
 	 * @param mixed $mDefault
 	 * @return mixed
 	 */
@@ -506,11 +523,14 @@ class ICWP_Plugins_Base_CBC {
 		return $this->oPluginVo->getOptionStoragePrefix().$sOptionName;
 	}
 
-	public function onWpActivatePlugin() { }
-	public function onWpDeactivatePlugin() { }
-	
+	public function onWpActivatePlugin() {
+	}
+
+	public function onWpDeactivatePlugin() {
+	}
+
 	public function onWpUninstallPlugin() {
-	
+
 		//Do we have admin priviledges?
 		if ( current_user_can( 'manage_options' ) ) {
 			$this->deleteAllPluginDbOptions();
@@ -521,10 +541,11 @@ class ICWP_Plugins_Base_CBC {
 	 * Takes an array, an array key, and a default value. If key isn't set, sets it to default.
 	 */
 	protected function def( &$aSrc, $insKey, $insValue = '' ) {
-		if ( !isset( $aSrc[$insKey] ) ) {
-			$aSrc[$insKey] = $insValue;
+		if ( !isset( $aSrc[ $insKey ] ) ) {
+			$aSrc[ $insKey ] = $insValue;
 		}
 	}
+
 	/**
 	 * Takes an array, an array key and an element type. If value is empty, sets the html element
 	 * string to empty string, otherwise forms a complete html element parameter.
@@ -533,9 +554,8 @@ class ICWP_Plugins_Base_CBC {
 	 * will return String: style="aSomeArray[sSomeArrayKey]" or empty string.
 	 */
 	protected function noEmptyElement( &$inaArgs, $insAttrKey, $insElement = '' ) {
-		$sAttrValue = $inaArgs[$insAttrKey];
-		$insElement = ( $insElement == '' )? $insAttrKey : $insElement;
-		$inaArgs[$insAttrKey] = ( empty($sAttrValue) ) ? '' : ' '.$insElement.'="'.$sAttrValue.'"';
+		$sAttrValue = $inaArgs[ $insAttrKey ];
+		$insElement = ( $insElement == '' ) ? $insAttrKey : $insElement;
+		$inaArgs[ $insAttrKey ] = ( empty( $sAttrValue ) ) ? '' : ' '.$insElement.'="'.$sAttrValue.'"';
 	}
-
 }//Worpit_Plugins_Base Class
