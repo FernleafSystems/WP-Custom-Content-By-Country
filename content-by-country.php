@@ -1,15 +1,15 @@
 <?php
 /*
-Plugin Name: Custom Content by Country (from iControlWP)
+Plugin Name: Custom Content by Country (from Shield Security)
 Plugin URI: https://icwp.io/db
 Description: Tool for displaying/hiding custom content based on visitors country/location.
 Version: 2.18.200520
-Author: One Dollar Plugin
+Author: AptoWeb
 Author URI: https://icwp.io/da
 */
 
 /**
- * Copyright (c) 2020 One Dollar Plugin <support@onedollarplugin.com>
+ * Copyright (c) 2022 AptoWeb <support@getshieldsecurity.com>
  * All rights reserved.
  *
  * "Custom Content by Country" is

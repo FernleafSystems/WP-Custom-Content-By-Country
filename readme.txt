@@ -9,7 +9,7 @@ Stable tag: 2.18.200520
 
 == Description ==
 
-Custom Content by Country from [Multiple WordPress Security Manager](http://icwp.io/5z "iControlWP: Multiple WordPress Security Manager")
+Custom Content by Country from the team behind [Shield Security](http://icwp.io/kx "Shield Security")
 offers you the option to show/hide content to users based on their location (where provided).
 
 With a simple shortcode you can specify, using a list of country codes whether to
@@ -46,9 +46,19 @@ To show the text "abcdefg" ONLY to visitors from the US and France, I would use 
 
 [CBC country="us, fr" show="y"]abcdefg[/CBC]
 
-To then hide the text "mnopqrst" ONLY from visitors in Spain, I would use the following shortcode:
+To then hide the text "mnopqrst" ONLY from visitors in Spain, use the following shortcode:
 
 [CBC country="es" show="n"]mnopqrst[/CBC]
+
+= Can I filter for IP addresses instead of countries? =
+
+Yes, instead of using the `country` field, use `ip` instead. e.g.
+
+[CBC ip="1.2.3.4" show="y"]mnopqrst[/CBC]
+
+Note 1: If you have "country" field supplied, it'll never consider IP addresses. So make sure to remove the country field.
+
+Note 2: The plugin makes  attempt to verify the correct visitor IP address. This is up to you and your web hosting provider to ensure it's valid.
 
 = What happens if I leave out the option "show"? =
 

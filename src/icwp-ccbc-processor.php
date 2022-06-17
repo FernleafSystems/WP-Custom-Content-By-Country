@@ -13,12 +13,12 @@ class ICWP_CCBC_Processor_GeoLocation {
 	protected $fHtmlOffMode = false;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 */
 	protected $fW3tcCompatibilityMode = false;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 */
 	protected $fDeveloperMode = false;
 
@@ -152,57 +152,65 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * If the visitor is not from a country in the 'country' list and show='n', then show the content.
 	 * Otherwise display 'message' if defined.
 	 * 'message' is displayed where the the content isn't displayed.
-	 * @param        $aParams
-	 * @param string $sContent
+	 * @param        $params
+	 * @param string $content
 	 * @return string
 	 */
-	public function sc_printContentByCountry( $aParams = [], $sContent = '' ) {
-		$aParams = shortcode_atts(
-			[
-				'message' => '',
-				'show'    => 'y',
-				'country' => '',
-			],
-			$aParams
-		);
+	public function sc_printContentByCountry( $params = [], $content = '' ) {
+		$params = shortcode_atts( [
+			'message' => '',
+			'show'    => 'y',
+			'country' => '',
+			'ip'      => '',
+		], $params );
 
-		$aParams[ 'country' ] = str_replace( ' ', '', strtolower( $aParams[ 'country' ] ) );
-		if ( empty( $aParams[ 'country' ] ) ) {
-			return do_shortcode( $sContent );
+		$params[ 'country' ] = str_replace( ' ', '', strtolower( $params[ 'country' ] ) );
+		$params[ 'ip' ] = str_replace( ' ', '', strtolower( $params[ 'ip' ] ) );
+
+		if ( empty( $params[ 'country' ] ) && empty( $params[ 'ip' ] ) ) {
+			$output = do_shortcode( $content );
+		}
+		else {
+			if ( !empty( $params[ 'country' ] ) ) {
+				$selectedCountries = array_map(
+					function ( $country ) {
+						return trim( strtolower( $country ) );
+					},
+					explode( ',', $params[ 'country' ] )
+				);
+				if ( in_array( 'uk', $selectedCountries ) ) {
+					$selectedCountries[] = 'gb'; // FIX for use "iso_code_2" db column instead of "code"
+				}
+
+				$isVisitorMatched = in_array( $this->getVisitorCountryCode(), $selectedCountries );
+			}
+			else { // == !empty( $params[ 'ip' ]
+				$selectedIPs = array_map(
+					function ( $ip ) {
+						return trim( strtolower( $ip ) );
+					},
+					explode( ',', $params[ 'ip' ] )
+				);
+				$isVisitorMatched = in_array( $this->loadDataProcessor()->GetVisitorIpAddress( false ), $selectedIPs );
+			}
+
+			$isShowVisitorContent = strtolower( $params[ 'show' ] ) != 'n'; // defaults to show content
+			$isShowContent = $isShowVisitorContent === $isVisitorMatched;
+
+			$this->def( $params, 'class', 'cbc_content' );
+			$output = $this->printShortCodeHtml( $params, do_shortcode( $isShowContent ? $content : $params[ 'message' ] ) );
 		}
 
-		$aSelectedCountries = explode( ',', $aParams[ 'country' ] );
-		//FIX for use "iso_code_2" db column instead of "code"
-		if ( in_array( 'uk', $aSelectedCountries ) ) {
-			$aSelectedCountries[] = 'gb';
-		}
-		$sVisitorCountryCode = strtolower( $this->getVisitorCountryCode() );
-
-		$fIsVisitorFromSelectedCountries = in_array( $sVisitorCountryCode, $aSelectedCountries );
-
-		// we default to show
-		$fDoShowVisitorContentSetting = strtolower( $aParams[ 'show' ] ) != 'n';
-		$fShowContent = true;
-		if ( !$fDoShowVisitorContentSetting && $fIsVisitorFromSelectedCountries ) {
-			$fShowContent = false;
-		}
-		if ( $fDoShowVisitorContentSetting && !$fIsVisitorFromSelectedCountries ) {
-			$fShowContent = false;
-		}
-
-		$sOutput = do_shortcode( $fShowContent ? $sContent : $aParams[ 'message' ] );
-
-		$this->def( $aParams, 'class', 'cbc_content' );
-		return $this->printShortCodeHtml( $aParams, $sOutput );
+		return $output;
 	}
 
 	/**
-	 * @param array $aParams
+	 * @param array $params
 	 * @return string
 	 */
-	public function sc_printVisitorCountryCode( $aParams = [] ) {
-		$aParams = shortcode_atts( [ 'class' => 'cbc_countrycode' ], $aParams );
-		return $this->printShortCodeHtml( $aParams, $this->getVisitorCountryCode() );
+	public function sc_printVisitorCountryCode( $params = [] ) {
+		$params = shortcode_atts( [ 'class' => 'cbc_countrycode' ], $params );
+		return $this->printShortCodeHtml( $params, $this->getVisitorCountryCode() );
 	}
 
 	/**
@@ -224,29 +232,29 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	/**
-	 * @param        $aParams
-	 * @param string $sContent
+	 * @param        $params
+	 * @param string $content
 	 * @return string
 	 */
-	private function printShortCodeHtml( &$aParams, $sContent ) {
+	private function printShortCodeHtml( &$params, $content ) {
 		$this->handleW3tcCompatibiltyMode();
 
-		$this->def( $aParams, 'html', '' );
-		$this->def( $aParams, 'id' );
-		$this->def( $aParams, 'style' );
-		$this->noEmptyElement( $aParams, 'id' );
-		$this->noEmptyElement( $aParams, 'style' );
-		$this->noEmptyElement( $aParams, 'class' );
+		$this->def( $params, 'html' );
+		$this->def( $params, 'id' );
+		$this->def( $params, 'style' );
+		$this->noEmptyElement( $params, 'id' );
+		$this->noEmptyElement( $params, 'style' );
+		$this->noEmptyElement( $params, 'class' );
 
-		if ( $this->getHtmlIsOff( $aParams[ 'html' ] ) || empty( $sContent ) ) {
-			$sReturnContent = $sContent;
+		if ( $this->getHtmlIsOff( $params[ 'html' ] ) || empty( $content ) ) {
+			$sReturnContent = $content;
 		}
 		else {
-			$aParams[ 'html' ] = empty( $aParams[ 'html' ] ) ? 'span' : $aParams[ 'html' ];
-			$sReturnContent = '<'.$aParams[ 'html' ]
-							  .$aParams[ 'style' ]
-							  .$aParams[ 'class' ]
-							  .$aParams[ 'id' ].'>'.$sContent.'</'.$aParams[ 'html' ].'>';
+			$params[ 'html' ] = empty( $params[ 'html' ] ) ? 'span' : $params[ 'html' ];
+			$sReturnContent = '<'.$params[ 'html' ]
+							  .$params[ 'style' ]
+							  .$params[ 'class' ]
+							  .$params[ 'id' ].'>'.$content.'</'.$params[ 'html' ].'>';
 		}
 
 		return trim( $sReturnContent );
@@ -256,33 +264,33 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function getVisitorCountryCode() {
+		$DP = $this->loadDataProcessor();
 
-		$oDp = $this->loadDataProcessor();
+		$theCode = 'us';  //defaults to US.
 
-		//Get the CloudFlare country if it's set
-		$sCode = $oDp->FetchServer( 'HTTP_CF_IPCOUNTRY' );
-		if ( !empty( $sCode ) ) {
-			return $sCode;
+		// Get the CloudFlare country if it's set
+		$cfCode = $DP->FetchServer( 'HTTP_CF_IPCOUNTRY' );
+		if ( !empty( $cfCode ) ) {
+			$theCode = $cfCode;
 		}
-
-		// Use Cookies if developer mode is off.
-		if ( !$this->fDeveloperMode ) {
-			$sCode = $oDp->FetchCookie( self::CbcDataCountryCodeCookie );
-			if ( !empty( $sCode ) ) {
-				return $sCode;
+		elseif ( !$this->fDeveloperMode ) {
+			// Use Cookies if developer mode is off.
+			$code = $DP->FetchCookie( self::CbcDataCountryCodeCookie );
+			if ( !empty( $code ) ) {
+				$theCode = $code;
+			}
+		}
+		elseif ( $DP->GetVisitorIpAddress( false ) == '127.0.0.1' ) {
+			$theCode = 'localhost';
+		}
+		else {
+			$data = $this->loadVisitorCountryData();
+			if ( !empty( $data->iso_code_2 ) ) {
+				$theCode = $data->iso_code_2;
 			}
 		}
 
-		if ( $oDp->GetVisitorIpAddress( false ) == '127.0.0.1' ) {
-			return 'localhost';
-		}
-
-		$oVisitorData = $this->loadVisitorCountryData();
-		if ( !empty( $oVisitorData->iso_code_2 ) ) {
-			return $oVisitorData->iso_code_2;
-		}
-
-		return 'us'; //defaults to US.
+		return strtolower( (string)$theCode );
 	}
 
 	/**
@@ -382,13 +390,13 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	/**
-	 * @param array  $aSrc
-	 * @param string $insKey
-	 * @param string $insValue
+	 * @param array  $src
+	 * @param string $key
+	 * @param string $value
 	 */
-	protected function def( &$aSrc, $insKey, $insValue = '' ) {
-		if ( is_array( $aSrc ) && !isset( $aSrc[ $insKey ] ) ) {
-			$aSrc[ $insKey ] = $insValue;
+	protected function def( &$src, $key, $value = '' ) {
+		if ( is_array( $src ) && !isset( $src[ $key ] ) ) {
+			$src[ $key ] = $value;
 		}
 	}
 
@@ -422,9 +430,8 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function buildAffLinkFromAsinOnly( $sAsin ) {
-		//Default country code to US. (amazon.com)
-		$sCountryCode = strtolower( $this->getVisitorCountryCode() );
-		return $this->buildAffLinkFromCountryCode( $sAsin, $sCountryCode );
+		// Default country code to US. (amazon.com)
+		return $this->buildAffLinkFromCountryCode( $sAsin, $this->getVisitorCountryCode() );
 	}
 
 	/**
@@ -477,9 +484,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	protected function buildAffLinkAmazon( $sAsin = '', $sAmazonDomain = 'com', $sAffIdTag = '' ) {
-
-		$sLink = 'http://www.amazon.%s/dp/%s/?tag=%s&creativeASIN=%s';
-		return sprintf( $sLink,
+		return sprintf( 'https://www.amazon.%s/dp/%s/?tag=%s&creativeASIN=%s',
 			$sAmazonDomain,
 			$sAsin,
 			$sAffIdTag,
