@@ -1,11 +1,11 @@
-=== Custom Content by Country (by One Dollar Plugin) ===
-Contributors: paultgoodchild, onedollarplugin
+=== Custom Content by Country (by Shield Security) ===
+Contributors: paultgoodchild
 Donate link: https://icwp.io/d9
 Tags: ip2nation, custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 5.4
+Tested up to: 6.0
 Requires PHP: 5.4
-Stable tag: 2.18.200520
+Stable tag: 2.19
 
 == Description ==
 
@@ -128,6 +128,8 @@ the W3 Total Cache plugin for more info.
 
 = Do you make any other plugins? =
 
+We created the [Shield Security](http://icwp.io/kx "Shield Security") plugin for people who want better WP Security.
+
 We also created the [Manage Multiple WordPress Site Better Tool: iControlWP](http://icwp.io/60) for people with multiple WordPress sites to manage.
 
 Yes, we created the only [Twitter Bootstrap WordPress](http://icwp.io/61 "Twitter Bootstrap WordPress Plugin")
@@ -151,6 +153,11 @@ ip2nationCountries
 = TODO =
 
 * Add option to remove the ip2nations data from the database.
+
+= 2.19 =
+*released 17th June 2022*
+
+* NEW:  Added support for using IP addresses instead of just country codes.
 
 = 2.18.200520 =
 *released 21st June 2020*
