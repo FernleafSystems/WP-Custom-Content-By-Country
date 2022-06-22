@@ -260,16 +260,34 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 * @return string
 	 */
 	public function getVisitorCountryCode() {
-		$code = 'us';
+		$code = null;
+
+		$codeRegEx = '/^[a-z]{2}$/i';
 
 		if ( $this->loadDataProcessor()->GetVisitorIpAddress() == '127.0.0.1' ) {
 			$code = 'localhost';
 		}
 		else {
-			try {
-				$code = $this->getMMCountry()->country->isoCode;
+			if ( function_exists( 'geoip_detect2_get_info_from_ip' ) ) {
+				$data = geoip_detect2_get_info_from_ip( $this->loadDataProcessor()->GetVisitorIpAddress() );
+				if ( is_object( $data ) && isset( $data->country )
+					 && !empty( $data->country->isoCode ) && preg_match( $codeRegEx, $data->country->isoCode ) ) {
+					$code = $data->country->isoCode;
+				}
 			}
-			catch ( Exception $e ) {
+
+			if ( empty( $code ) ) {
+
+				if ( !empty( $_SERVER[ 'HTTP_CF_IPCOUNTRY' ] ) && preg_match( $codeRegEx, $_SERVER[ 'HTTP_CF_IPCOUNTRY' ] ) ) {
+					$code = $_SERVER[ 'HTTP_CF_IPCOUNTRY' ];
+				}
+				else {
+					try {
+						$code = $this->getMMCountry()->country->isoCode;
+					}
+					catch ( Exception $e ) {
+					}
+				}
 			}
 		}
 
@@ -277,32 +295,55 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getVisitorCountryName() {
+		$country = '';
+
+		if ( $this->loadDataProcessor()->GetVisitorIpAddress() == '127.0.0.1' ) {
+			$country = 'localhost';
+		}
+		else {
+			if ( function_exists( 'geoip_detect2_get_info_from_ip' ) ) {
+				$data = geoip_detect2_get_info_from_ip( $this->loadDataProcessor()->GetVisitorIpAddress() );
+				if ( is_object( $data ) && isset( $data->country )
+					 && !empty( $data->country->names ) && is_array( $data->country->names ) ) {
+					$names = $data->country->names;
+					if ( isset( $names[ 'en' ] ) ) {
+						$country = $names[ 'en' ];
+					}
+					else {
+						$country = array_shift( $names );
+					}
+				}
+			}
+
+			if ( empty( $country ) ) {
+				try {
+					$country = $this->getMMCountry()->country->name;
+				}
+				catch ( Exception $e ) {
+				}
+			}
+		}
+
+		return empty( $country ) ? 'Unknown' : $country;
+	}
+
+	/**
 	 * @return \GeoIp2\Model\Country
 	 * @throws Exception
 	 */
 	public function getMMCountry() {
+		$this->requireLib();
 		$pathToDB = path_join( \ICWP_CustomContentByCountry_Plugin::GetInstance()->getRootDir(),
 			'resources/MaxMind/GeoLite2-Country.mmdb' );
 		return ( new RetrieveCountryForVisitor( $pathToDB ) )
 			->lookupIP( $this->loadDataProcessor()->GetVisitorIpAddress() );
 	}
 
-	/**
-	 * @return string
-	 */
-	public function getVisitorCountryName() {
-		$country = '';
-		if ( $this->loadDataProcessor()->GetVisitorIpAddress() == '127.0.0.1' ) {
-			$country = 'localhost';
-		}
-		else {
-			try {
-				$country = $this->getMMCountry()->country->name;
-			}
-			catch ( Exception $e ) {
-			}
-		}
-		return empty( $country ) ? 'Unknown' : $country;
+	protected function requireLib() {
+		require_once( \ICWP_CustomContentByCountry_Plugin::GetInstance()->getRootDir().'/vendor/autoload.php' );
 	}
 
 	/**
