@@ -343,7 +343,9 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	protected function requireLib() {
-		require_once( \ICWP_CustomContentByCountry_Plugin::GetInstance()->getRootDir().'/vendor/autoload.php' );
+		require_once( path_join(
+			\ICWP_CustomContentByCountry_Plugin::GetInstance()->getRootDir(), 'vendor/autoload.php'
+		) );
 	}
 
 	/**
@@ -351,7 +353,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 */
 	public function loadDataProcessor() {
 		if ( !class_exists( 'ICWP_CCBC_DataProcessor' ) ) {
-			require_once( dirname( __FILE__ ).'/icwp-data-processor.php' );
+			require_once( __DIR__.'/icwp-data-processor.php' );
 		}
 		return ICWP_CCBC_DataProcessor::GetInstance();
 	}

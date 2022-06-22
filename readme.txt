@@ -5,7 +5,7 @@ Tags: custom content, location, geolocation
 Requires at least: 3.2.0
 Tested up to: 6.0
 Requires PHP: 5.4
-Stable tag: 3.0.0
+Stable tag: 3.1.0
 
 == Description ==
 
@@ -142,6 +142,13 @@ If your local network address is defined as "Private" according to the database,
 This isn't fully tested and shouldn't be used as-is in production but it seems to hold up.  Feedback welcome.
 
 == Changelog ==
+
+= 3.1.0 =
+*released 22nd June 2022*
+
+* NEW:     Make use of 3rd party plugins for Geolocation data if you're using them. i.e. [Geolocation IP Detection](https://wordpress.org/plugins/geoip-detect/)
+* CHANGED: Use CloudFlare Country Code header if 3rd party data isn't available before other lookups.
+* FIXED:   Prevent conflict with other plugins by only including the libraries if they're absolutely required.
 
 = 3.0.0 =
 *released 17th June 2022*
