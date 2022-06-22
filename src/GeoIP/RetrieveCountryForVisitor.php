@@ -2,13 +2,7 @@
 
 namespace FernleafSystems\Wordpress\Plugin\CCBC\GeoIP;
 
-class RetrieveCountryForVisitor {
-
-	private $pathDB;
-
-	public function __construct( $pathToDB ) {
-		$this->pathDB = $pathToDB;
-	}
+class RetrieveCountryForVisitor extends Base {
 
 	/**
 	 * @param string $ip
