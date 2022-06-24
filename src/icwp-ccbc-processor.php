@@ -268,12 +268,10 @@ class ICWP_CCBC_Processor_GeoLocation {
 			$code = 'localhost';
 		}
 		else {
-			if ( function_exists( 'geoip_detect2_get_info_from_ip' ) ) {
-				$data = geoip_detect2_get_info_from_ip( $this->loadDataProcessor()->GetVisitorIpAddress() );
-				if ( is_object( $data ) && isset( $data->country )
-					 && !empty( $data->country->isoCode ) && preg_match( $codeRegEx, $data->country->isoCode ) ) {
-					$code = $data->country->isoCode;
-				}
+			$data = $this->getDataFromPlugin_GeoIpDetect();
+			if ( is_object( $data ) && isset( $data->country )
+				 && !empty( $data->country->isoCode ) && preg_match( $codeRegEx, $data->country->isoCode ) ) {
+				$code = $data->country->isoCode;
 			}
 
 			if ( empty( $code ) ) {
@@ -304,18 +302,10 @@ class ICWP_CCBC_Processor_GeoLocation {
 			$country = 'localhost';
 		}
 		else {
-			if ( function_exists( 'geoip_detect2_get_info_from_ip' ) ) {
-				$data = geoip_detect2_get_info_from_ip( $this->loadDataProcessor()->GetVisitorIpAddress() );
-				if ( is_object( $data ) && isset( $data->country )
-					 && !empty( $data->country->names ) && is_array( $data->country->names ) ) {
-					$names = $data->country->names;
-					if ( isset( $names[ 'en' ] ) ) {
-						$country = $names[ 'en' ];
-					}
-					else {
-						$country = array_shift( $names );
-					}
-				}
+			$data = $this->getDataFromPlugin_GeoIpDetect();
+			if ( is_object( $data ) && isset( $data->country ) && !empty( $data->country->names ) && is_array( $data->country->names ) ) {
+				$names = $data->country->names;
+				$country = empty( $names[ 'en' ] ) ? array_shift( $names ) : $names[ 'en' ];
 			}
 
 			if ( empty( $country ) ) {
@@ -328,6 +318,25 @@ class ICWP_CCBC_Processor_GeoLocation {
 		}
 
 		return empty( $country ) ? 'Unknown' : $country;
+	}
+
+	/**
+	 * https://wordpress.org/plugins/geoip-detect/
+	 * @return null|object
+	 */
+	private function getDataFromPlugin_GeoIpDetect() {
+		$data = null;
+		$ip = $this->loadDataProcessor()->GetVisitorIpAddress();
+
+		if ( !empty( $ip ) && function_exists( 'geoip_detect2_get_info_from_ip' ) ) {
+			$data = geoip_detect2_get_info_from_ip( $ip );
+		}
+		if ( ( empty( $data ) || !isset( $data->country ) || empty( $data->country->isoCode ) )
+			 && function_exists( 'geoip_detect2_get_info_from_current_ip' ) ) {
+			$data = geoip_detect2_get_info_from_current_ip( $ip );
+		}
+
+		return $data;
 	}
 
 	/**
