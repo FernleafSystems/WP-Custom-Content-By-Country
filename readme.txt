@@ -5,7 +5,7 @@ Tags: custom content, location, geolocation
 Requires at least: 3.2.0
 Tested up to: 6.0
 Requires PHP: 5.4
-Stable tag: 3.1.1
+Stable tag: 3.1.2
 
 == Description ==
 
@@ -146,7 +146,8 @@ This isn't fully tested and shouldn't be used as-is in production but it seems t
 = 3.1.0 =
 *released 22nd June 2022*
 
-* .1 FIXED:  Prevent an error if our plugin can't detect a valid IP address.
+* .2 FIXED:  Prevent an error if our plugin can't detect a valid IP address.
+* .2 FIXED:  Remove unnecessary admin notice.
 * NEW:       Make use of 3rd party plugins for Geolocation data if you're using them. i.e. [Geolocation IP Detection](https://wordpress.org/plugins/geoip-detect/)
 * CHANGED:   Use CloudFlare Country Code header if 3rd party data isn't available before other lookups.
 * FIXED:     Prevent conflict with other plugins by only including the libraries if they're absolutely required.
