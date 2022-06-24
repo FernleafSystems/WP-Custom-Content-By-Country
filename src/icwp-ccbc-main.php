@@ -46,7 +46,6 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	public function onWpAdminNotices() {
 		if ( current_user_can( 'manage_options' ) ) {
 			$this->adminNoticeOptionsUpdated();
-			$this->adminNoticeVersionUpgrade();
 		}
 	}
 
@@ -250,28 +249,6 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 				$sClass = 'error';
 			}
 			$this->getAdminNotice( $sNotice, $sClass, true );
-		}
-	}
-
-	private function adminNoticeVersionUpgrade() {
-
-		global $current_user;
-		$user_id = $current_user->ID;
-
-		$sCurrentVersion = get_user_meta( $user_id, $this->oPluginVo->getOptionStoragePrefix().'current_version', true );
-
-		if ( $sCurrentVersion !== $this->oPluginVo->getVersion() ) {
-			$sNotice = '
-					<form method="post" action="admin.php?page='.$this->getFullParentMenuId().'">
-						<p><strong>Custom Content By Country</strong> plugin has been updated. Worth checking out the latest docs.
-						<input type="hidden" value="1" name="'.$this->oPluginVo->getOptionStoragePrefix().'hide_update_notice" id="'.$this->oPluginVo->getOptionStoragePrefix().'hide_update_notice">
-						<input type="hidden" value="'.$user_id.'" name="worpit_user_id" id="worpit_user_id">
-						<input type="submit" value="Okay, show me and hide this notice" name="submit" class="button-primary">
-						</p>
-					</form>
-			';
-
-			$this->getAdminNotice( $sNotice, 'updated', true );
 		}
 	}
 
