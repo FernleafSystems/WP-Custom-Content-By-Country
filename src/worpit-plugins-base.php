@@ -145,19 +145,13 @@ class ICWP_Plugins_Base_CBC {
 	}
 
 	public function onWpPluginsLoaded() {
-
 		if ( is_admin() ) {
-			//Handle plugin upgrades
 			$this->handlePluginUpgrade();
-		}
-
-		if ( $this->isWorpitPluginAdminPage() ) {
-			//Handle form submit
-			$this->handlePluginFormSubmit();
 		}
 	}
 
 	public function onWpInit() {
+		$this->handlePluginFormSubmit();
 	}
 
 	public function onWpLoaded() {
@@ -352,7 +346,6 @@ class ICWP_Plugins_Base_CBC {
 		}
 
 		foreach ( $inaOptionsSection[ 'section_options' ] as &$aOptionParams ) {
-
 			list( $sOptionKey, $sOptionCurrent, $sOptionDefault ) = $aOptionParams;
 			$sCurrentOptionVal = $this->getOption( $sOptionKey );
 			$aOptionParams[ 1 ] = ( $sCurrentOptionVal == '' ) ? $sOptionDefault : $sCurrentOptionVal;
@@ -360,31 +353,30 @@ class ICWP_Plugins_Base_CBC {
 	}
 
 	/**
-	 * @param $sAllOptionsInput - comma separated list of all the input keys to be processed from the $_POST
+	 * @param $allOptionsInput - comma separated list of all the input keys to be processed from the $_POST
 	 * @return bool
 	 */
-	protected function updatePluginOptionsFromSubmit( $sAllOptionsInput ) {
+	protected function updatePluginOptionsFromSubmit( $allOptionsInput ) {
 
-		if ( empty( $sAllOptionsInput ) ) {
+		if ( empty( $allOptionsInput ) ) {
 			return true;
 		}
 
-		$aAllInputOptions = explode( ',', $sAllOptionsInput );
-		foreach ( $aAllInputOptions as $sInputKey ) {
-			$aInput = explode( ':', $sInputKey );
-			list( $sOptionType, $sOptionKey ) = $aInput;
+		foreach ( explode( ',', $allOptionsInput ) as $inputKey ) {
+			$input = explode( ':', $inputKey );
+			list( $optionType, $optionKey ) = $input;
 
-			$sOptionValue = $this->getAnswerFromPost( $sOptionKey );
-			if ( is_null( $sOptionValue ) ) {
+			$optionValue = $this->getAnswerFromPost( $optionKey );
+			if ( is_null( $optionValue ) ) {
 
-				if ( $sOptionType == 'text' ) { //if it was a text box, and it's null, don't update anything
+				if ( $optionType == 'text' ) { //if it was a text box, and it's null, don't update anything
 					continue;
 				}
-				elseif ( $sOptionType == 'checkbox' ) { //if it was a checkbox, and it's null, it means 'N'
-					$sOptionValue = 'N';
+				elseif ( $optionType == 'checkbox' ) { //if it was a checkbox, and it's null, it means 'N'
+					$optionValue = 'N';
 				}
 			}
-			$this->updateOption( $sOptionKey, $sOptionValue );
+			$this->updateOption( $optionKey, $optionValue );
 		}
 		return true;
 	}
