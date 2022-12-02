@@ -16,6 +16,7 @@ include_once( dirname( __FILE__ ).'/widgets/worpit_widgets.php' );
 					<div class="form-actions">
 						<input type="hidden" name="<?php echo $worpit_var_prefix.'all_options_input'; ?>"
 						       value="<?php echo $worpit_all_options_input; ?>" />
+						<?php echo $worpit_form_nonce ?>
 						<button type="submit" class="btn btn-primary" name="submit">Save All Settings</button>
 					</div>
 				</form>

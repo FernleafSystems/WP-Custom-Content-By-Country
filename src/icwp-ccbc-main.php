@@ -199,8 +199,9 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 
 	/** BELOW IS SPECIFIC TO THIS PLUGIN **/
 	protected function handlePluginFormSubmit() {
-		if ( $this->isWorpitPluginAdminPage() && isset( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] ) ) {
-			//Don't need to run isset() because previous function does this
+		if ( $this->isWorpitPluginAdminPage()
+			 && isset( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] ) ) {
+
 			if ( $_GET[ 'page' ] === $this->getSubmenuId( 'main' ) ) {
 				$this->handleSubmit_main();
 			}
@@ -208,6 +209,11 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	}
 
 	protected function handleSubmit_main() {
+		if ( !current_user_can( $this->oPluginVo->getBasePermissions() ) ) {
+			wp_die( 'Invalid user permissions' );
+		}
+		check_admin_referer( $this->oPluginVo->getOptionStoragePrefix().'main_submit' );
+
 		$this->updatePluginOptionsFromSubmit( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] );
 	}
 
@@ -231,7 +237,8 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 			'var_prefix'        => $this->oPluginVo->getOptionStoragePrefix(),
 			'aAllOptions'       => $aAvailableOptions,
 			'all_options_input' => $sAllInputOptions,
-			'form_action'       => 'admin.php?page='.$this->getFullParentMenuId().'-main'
+			'form_action'       => 'admin.php?page='.$this->getFullParentMenuId().'-main',
+			'form_nonce'        => wp_nonce_field( $this->oPluginVo->getOptionStoragePrefix().'main_submit', '_wpnonce', true, false ),
 		] );
 	}
 
