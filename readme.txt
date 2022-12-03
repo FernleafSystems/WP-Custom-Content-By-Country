@@ -3,7 +3,7 @@ Contributors: paultgoodchild
 Donate link: https://icwp.io/d9
 Tags: custom content, location, geolocation
 Requires at least: 3.2.0
-Tested up to: 6.0
+Tested up to: 6.1
 Requires PHP: 5.4
 Stable tag: 3.1.3
 

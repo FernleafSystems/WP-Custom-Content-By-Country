@@ -213,8 +213,10 @@ class ICWP_Plugins_Base_CBC {
 	 * The callback function for the main admin menu index page
 	 */
 	public function onDisplayMainMenu() {
-		$aData = [ 'plugin_url' => $this->sPluginUrl ];
-		$this->display( 'worpit_'.$this->oPluginVo->getPluginSlug().'_index', $aData );
+		$this->display( 'worpit_'.$this->oPluginVo->getPluginSlug().'_index', [
+			'plugin_url'    => $this->sPluginUrl,
+			'icwp_logo_url' => $this->sPluginUrl.'resources/images/icwp_logo-250.png',
+		] );
 	}
 
 	/**

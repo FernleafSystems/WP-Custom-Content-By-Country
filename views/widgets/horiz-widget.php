@@ -27,7 +27,9 @@
 </ul>
 </div>
 <div class="span4" id="worpit_logo">
-<a class="btn" href="http://icwp.io/x" target="_blank"><img src="https://www.icontrolwp.com/custom/remote/plugins/resources/images/icwp_logo-250.png" /></a>
+<a class="btn" href="http://icwp.io/x" target="_blank">
+	<img src="<?php echo $worpit_icwp_logo_url ?>" />
+</a>
 </div>
 </div>
 </div>
