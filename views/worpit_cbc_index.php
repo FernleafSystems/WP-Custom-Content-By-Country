@@ -1,5 +1,4 @@
 <?php
-include_once( dirname( __FILE__ ).'/widgets/worpit_widgets.php' );
 include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
 ?>
 
@@ -9,20 +8,18 @@ include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
 		<?php printOptionsPageHeader( 'Dashboard' ); ?>
 
 		<div class="row">
-			<div class="span12">
+			<div class="col-12">
 				<div class="alert alert-error">
 					<h4 class="alert-heading">Important Notice</h4>
 					You need to go to the <a href="admin.php?page=<?php echo $this->getSubmenuId( 'main' ) ?>">
 						main plugin Settings page</a> to enable the plugin features.</div>
-			</div><!-- / span12 -->
-		</div><!-- / row -->
+			</div>
+		</div>
 
 		<div class="row" id="tbs_docs">
-		  <div class="span6" id="tbs_docs_shortcodes">
+		  <div class="col-6" id="tbs_docs_shortcodes">
 			  <div class="well">
 				<h3>Custom Content By Country Shortcodes</h3>
-				<p>To learn more about what shortcodes are, <a
-							href="http://www.hostliketoast.com/2011/12/how-extend-wordpress-powerful-shortcodes/">check this link</a></p>
 				<p>The following shortcodes are available:</p>
 				<ol>
 					<li>[ CBC ]</li>
@@ -31,8 +28,9 @@ include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
 					<li>[ CBC_CODE ]</li>
 				</ol>
 			  </div>
-		  </div><!-- / span6 -->
-		  <div class="span6" id="tbs_docs_examples">
+		  </div>
+
+		  <div class="col-6" id="tbs_docs_examples">
 			  <div class="well">
 					<h3>Shortcode Usage Examples</h3>
 					<div class="shortcode-usage">
@@ -46,14 +44,15 @@ include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
 						</ul>
 					</div>
 			  </div>
-		  </div><!-- / span6 -->
-		</div><!-- / row -->
+		  </div>
 
-		<div class="row" id="worpit_promo">
-		  <div class="span12">
+		</div>
+
+		<div class="row mt-5" id="worpit_promo">
+		  <div class="col-12">
         <?php include( __DIR__.'/widgets/horiz-widget.php' ); ?>
 		  </div>
-		</div><!-- / row -->
+		</div>
 
 	</div><!-- / bootstrap-wpadmin -->
 

@@ -5,9 +5,7 @@ include_once( dirname( __FILE__ ).'/icwp-data-processor.php' );
 
 class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 
-	protected $m_aPluginOptions_EnableSection;
-
-	protected $m_aPluginOptions_AffTagsSection;
+	private $pluginOptions_CCBC;
 
 	/**
 	 * @var ICWP_CCBC_Processor_GeoLocation
@@ -15,10 +13,10 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	protected $oProcessorGeoLocation;
 
 	/**
-	 * @param ICWP_CustomContentByCountry_Plugin $oPluginVo
+	 * @param ICWP_CustomContentByCountry_Plugin $pluginVO
 	 */
-	public function __construct( ICWP_CustomContentByCountry_Plugin $oPluginVo ) {
-		parent::__construct( $oPluginVo );
+	public function __construct( ICWP_CustomContentByCountry_Plugin $pluginVO ) {
+		parent::__construct( $pluginVO );
 
 		register_activation_hook( __FILE__, [ $this, 'onWpActivatePlugin' ] );
 		register_deactivation_hook( __FILE__, [ $this, 'onWpDeactivatePlugin' ] );
@@ -27,13 +25,13 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	}
 
 	public function onWpLoaded() {
-		if ( $this->getOption( 'enable_content_by_country' ) === 'Y' || $this->getOption( 'enable_amazon_associate' ) === 'Y' ) {
+		if ( $this->getOption( 'enable_content_by_country' ) === 'Y' ) {
 			$this->loadGeoLocationProcessor()->initShortCodes();
 		}
 	}
 
 	protected function createPluginSubMenuItems() {
-		$this->m_aPluginMenu = [
+		$this->menu = [
 			//Menu Page Title => Menu Item name, page ID (slug), callback function for this page - i.e. what to do/load.
 			$this->getSubmenuPageTitle( 'Content by Country' ) => [
 				'Content by Country',
@@ -60,8 +58,7 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	 * Override for specify the plugin's options
 	 */
 	protected function initPluginOptions() {
-
-		$this->m_aPluginOptions_EnableSection = [
+		$this->pluginOptions_CCBC = [
 			'section_title'   => 'Enable Content By Country Plugin Options',
 			'section_options' => [
 				[
@@ -91,119 +88,21 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 					'Turns off page caching for shortcodes',
 					"When enabled, 'Custom Content by Country' plugin will turn off page caching for pages that use these shortcodes."
 				],
-				[
-					'enable_amazon_associate',
-					'',
-					'N',
-					'checkbox',
-					'Amazon Associates',
-					'Enable Amazon Associates Feature',
-					"Provides the shortcode to use Amazon Associate links based on visitor's location."
-				],
 			]
 		];
 
-		$this->m_aPluginOptions_AffTagsSection = [
-			'section_title'   => 'Amazon Associate Tags by Region',
-			'section_options' => [
-				[
-					'afftag_amazon_region_us',
-					'',
-					'',
-					'text',
-					'US Associate Tag',
-					'Specify your Amazon.com Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_canada',
-					'',
-					'',
-					'text',
-					'Canada Associate Tag',
-					'Specify your Amazon.ca Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_uk',
-					'',
-					'',
-					'text',
-					'U.K. Associate Tag',
-					'Specify your Amazon.co.uk Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_france',
-					'',
-					'',
-					'text',
-					'France Associate Tag',
-					'Specify your Amazon.fr Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_germany',
-					'',
-					'',
-					'text',
-					'Germany Associate Tag',
-					'Specify your Amazon.de Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_italy',
-					'',
-					'',
-					'text',
-					'Italy Associate Tag',
-					'Specify your Amazon.it Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_spain',
-					'',
-					'',
-					'text',
-					'Spain Associate Tag',
-					'Specify your Amazon.es Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_japan',
-					'',
-					'',
-					'text',
-					'Japan Associate Tag',
-					'Specify your Amazon.co.jp Associate Tag here:',
-					''
-				],
-				[
-					'afftag_amazon_region_china',
-					'',
-					'',
-					'text',
-					'China Associate Tag',
-					'Specify your Amazon.cn Associate Tag here:',
-					''
-				],
-			]
-		];
-
-		$this->m_aAllPluginOptions = [
-			&$this->m_aPluginOptions_EnableSection,
-			&$this->m_aPluginOptions_AffTagsSection
+		$this->allPluginOptions = [
+			&$this->pluginOptions_CCBC,
 		];
 		return true;
 	}
 
-	/** BELOW IS SPECIFIC TO THIS PLUGIN **/
 	protected function handlePluginFormSubmit() {
 		if ( $this->isWorpitPluginAdminPage()
-			 && isset( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] ) ) {
-
-			if ( $_GET[ 'page' ] === $this->getSubmenuId( 'main' ) ) {
+			 && isset( $_POST[ $this->oPluginVo->getOptionStoragePrefix( 'all_options_input' ) ] ) ) {
+			if ( CCBC_DP::FetchGet( 'page', null, 'sanitize_key' ) === $this->getSubmenuId( 'main' ) ) {
 				$this->handleSubmit_main();
+				$this->allPluginOptions = null;
 			}
 		}
 	}
@@ -212,50 +111,34 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 		if ( !current_user_can( $this->oPluginVo->getBasePermissions() ) ) {
 			wp_die( 'Invalid user permissions' );
 		}
-		check_admin_referer( $this->oPluginVo->getOptionStoragePrefix().'main_submit' );
+		check_admin_referer( $this->oPluginVo->getOptionStoragePrefix( 'main_submit' ) );
 
-		$this->updatePluginOptionsFromSubmit( $_POST[ $this->oPluginVo->getOptionStoragePrefix().'all_options_input' ] );
+		$this->updatePluginOptionsFromSubmit(
+			CCBC_DP::FetchPost( $this->oPluginVo->getOptionStoragePrefix( 'all_options_input' ), '', 'sanitize_text_field' )
+		);
 	}
 
-	/**
-	 * For each display, if you're creating a form, define the form action page and the form_submit_id
-	 * that you can then use as a guard to handling the form submit.
-	 */
 	public function onDisplayCbcMain() {
-
-		//populates plugin options with existing configuration
-		$this->readyAllPluginOptions();
-
-		//Specify what set of options are available for this page
-		$aAvailableOptions = [ &$this->m_aPluginOptions_EnableSection, &$this->m_aPluginOptions_AffTagsSection ];
-
-		$sAllInputOptions = $this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_EnableSection );
-		$sAllInputOptions .= ','.$this->collateAllFormInputsForOptionsSection( $this->m_aPluginOptions_AffTagsSection );
-
-		$this->display( 'worpit_cbc_main', [
+		$this->display( 'worpit_cbc_main', array_merge( $this->getCommonDisplayVars(), [
 			'plugin_url'        => $this->sPluginUrl,
 			'var_prefix'        => $this->oPluginVo->getOptionStoragePrefix(),
-			'aAllOptions'       => $aAvailableOptions,
-			'all_options_input' => $sAllInputOptions,
+			'allOptions'        => $this->getAllPluginOptions(),
+			'all_options_input' => implode( ',', array_map(
+				function ( $optionSection ) {
+					return $this->collateAllFormInputsForOptionsSection( $optionSection, ',' );
+				}, $this->getAllPluginOptions() ) ),
 			'form_action'       => 'admin.php?page='.$this->getFullParentMenuId().'-main',
-			'form_nonce'        => wp_nonce_field( $this->oPluginVo->getOptionStoragePrefix().'main_submit', '_wpnonce', true, false ),
-		] );
+			'form_nonce'        => wp_nonce_field( $this->oPluginVo->getOptionStoragePrefix( 'main_submit' ), '_wpnonce', true, false ),
+		] ) );
 	}
 
 	private function adminNoticeOptionsUpdated() {
-
-		//Admin notice for Main Options page submit.
-		if ( isset( $_GET[ 'ccbc_options_updated' ] ) ) {
-
-			if ( $this->m_fUpdateSuccessTracker ) {
-				$sNotice = '<p>Updating CBC Plugin Options was a <strong>Success</strong>.</p>';
-				$sClass = 'updated';
-			}
-			else {
-				$sNotice = '<p>Updating CBC Plugin Options <strong>Failed</strong>.</p>';
-				$sClass = 'error';
-			}
-			$this->getAdminNotice( $sNotice, $sClass, true );
+		if ( CCBC_DP::FetchGet( 'ccbc_options_updated', '', 'sanitize_key' ) ) {
+			$this->getAdminNotice(
+				sprintf( 'Updating CBC Plugin Options: %s', $this->updateSuccess ? 'Successful' : 'Failure' ),
+				$this->updateSuccess ? 'updated' : 'error',
+				true
+			);
 		}
 	}
 

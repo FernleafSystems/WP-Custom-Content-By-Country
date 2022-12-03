@@ -84,11 +84,11 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	}
 
 	/**
-	 * @param string
+	 * @param string $glue
 	 * @return string
 	 */
-	public function getFullPluginPrefix( $sGlue = '-' ) {
-		return sprintf( '%s%s%s', self::$sParentSlug, $sGlue, self::$sPluginSlug );
+	public function getFullPluginPrefix( $glue = '-' ) {
+		return sprintf( '%s%s%s', self::$sParentSlug, $glue, self::$sPluginSlug );
 	}
 
 	/**
@@ -100,11 +100,11 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	}
 
 	/**
-	 * @param string
+	 * @param string $suffix
 	 * @return string
 	 */
-	public function getOptionStoragePrefix() {
-		return $this->getFullPluginPrefix( '_' ).'_';
+	public function getOptionStoragePrefix( $suffix = '' ) {
+		return $this->getFullPluginPrefix( '_' ).'_'.( empty( $suffix ) ? '' : $suffix );
 	}
 
 	/**

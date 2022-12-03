@@ -1,6 +1,5 @@
 <?php
 include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
-include_once( dirname( __FILE__ ).'/widgets/worpit_widgets.php' );
 ?>
 <div class="wrap">
 	<div class="bootstrap-wpadmin">
@@ -8,10 +7,10 @@ include_once( dirname( __FILE__ ).'/widgets/worpit_widgets.php' );
 		<?php printOptionsPageHeader( 'Main Options' ); ?>
 
 		<div class="row">
-			<div class="span9">
+			<div class="col-9">
 				<form method="post" action="<?php echo $worpit_form_action; ?>" class="form-horizontal">
 					<?php
-		  printAllPluginOptionsForm( $worpit_aAllOptions, $worpit_var_prefix, 1 );
+		  printAllPluginOptionsForm( $worpit_allOptions, $worpit_var_prefix, 1 );
 		  ?>
 					<div class="form-actions">
 						<input type="hidden" name="<?php echo $worpit_var_prefix.'all_options_input'; ?>"
@@ -21,7 +20,7 @@ include_once( dirname( __FILE__ ).'/widgets/worpit_widgets.php' );
 					</div>
 				</form>
 			</div><!-- / span9 -->
-			<div class="span3" id="side_widgets">
+			<div class="col-3" id="side_widgets">
 	  			<?php include( __DIR__.'/widgets/side-widget.php' ); ?>
 			</div>
 		</div>

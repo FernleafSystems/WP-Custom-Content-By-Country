@@ -83,7 +83,6 @@ class ICWP_CCBC_Processor_GeoLocation {
 					'CBC_COUNTRY' => [ $this, 'sc_printVisitorCountryName' ],
 					'CBC_CODE'    => [ $this, 'sc_printVisitorCountryCode' ],
 					'CBC_IP'      => [ $this, 'sc_printVisitorIpAddress' ],
-					'CBC_AMAZON'  => [ $this, 'sc_printAmazonLinkByCountry' ],
 					//			'CBC_HELP'  => [ $this, 'printHelp' ],
 				] as $shortcode => $callback
 			) {
@@ -95,50 +94,15 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	/**
-	 * The Shortcode function for CBC_AMAZON
-	 * @param array  $attributes
-	 * @param string $sContent
-	 * @return string
-	 */
-	public function sc_printAmazonLinkByCountry( $attributes = [], $sContent = '' ) {
-		$attributes = shortcode_atts(
-			[
-				'item'    => '',
-				'text'    => $sContent,
-				'asin'    => '',
-				'country' => '',
-			],
-			$attributes
-		);
-
-		if ( !empty( $attributes[ 'asin' ] ) ) {
-			$sAsinToUse = $attributes[ 'asin' ];
-		}
-		else {
-			return ''; //ASIN is undefined or the "item" does not exist.
-		}
-
-		if ( empty( $attributes[ 'country' ] ) ) {
-			$href = $this->buildAffLinkFromAsinOnly( $sAsinToUse );
-		}
-		else {
-			$href = $this->buildAffLinkFromCountryCode( $sAsinToUse, $attributes[ 'country' ] );
-		}
-
-		$output = '<a class="cbc_amazon_link" href="%s" target="_blank">%s</a>';
-		return sprintf( $output, $href, do_shortcode( $attributes[ 'text' ] ) );
-	}
-
-	/**
 	 * Meat and Potatoes of the CBC plugin
-	 * By default, $insContent will be "shown" for whatever countries are specified.
+	 * By default, $content will be "shown" for whatever countries are specified.
 	 * Alternatively, set to 'n' if you want to hide.
 	 * Logic is: if visitor is coming from a country in the 'country' list and show='y', then show the content.
 	 * OR
 	 * If the visitor is not from a country in the 'country' list and show='n', then show the content.
-	 * Otherwise display 'message' if defined.
-	 * 'message' is displayed where the the content isn't displayed.
-	 * @param        $params
+	 * Otherwise, display 'message' if defined.
+	 * 'message' is displayed where the content isn't displayed.
+	 * @param array  $params
 	 * @param string $content
 	 * @return string
 	 */
@@ -177,7 +141,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 					},
 					explode( ',', $params[ 'ip' ] )
 				);
-				$isVisitorMatched = in_array( $this->loadDataProcessor()->GetVisitorIpAddress(), $selectedIPs );
+				$isVisitorMatched = in_array( CCBC_DP::GetVisitorIpAddress(), $selectedIPs );
 			}
 
 			$isShowVisitorContent = strtolower( $params[ 'show' ] ) != 'n'; // defaults to show content
@@ -243,17 +207,17 @@ class ICWP_CCBC_Processor_GeoLocation {
 		$this->noEmptyElement( $params, 'class' );
 
 		if ( $this->getHtmlIsOff( $params[ 'html' ] ) || empty( $content ) ) {
-			$sReturnContent = $content;
+			$output = $content;
 		}
 		else {
 			$params[ 'html' ] = empty( $params[ 'html' ] ) ? 'span' : $params[ 'html' ];
-			$sReturnContent = '<'.$params[ 'html' ]
-							  .$params[ 'style' ]
-							  .$params[ 'class' ]
-							  .$params[ 'id' ].'>'.$content.'</'.$params[ 'html' ].'>';
+			$output = '<'.$params[ 'html' ]
+					  .$params[ 'style' ]
+					  .$params[ 'class' ]
+					  .$params[ 'id' ].'>'.$content.'</'.$params[ 'html' ].'>';
 		}
 
-		return trim( $sReturnContent );
+		return trim( $output );
 	}
 
 	/**
@@ -276,8 +240,9 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 			if ( empty( $code ) ) {
 
-				if ( !empty( $_SERVER[ 'HTTP_CF_IPCOUNTRY' ] ) && preg_match( $codeRegEx, $_SERVER[ 'HTTP_CF_IPCOUNTRY' ] ) ) {
-					$code = $_SERVER[ 'HTTP_CF_IPCOUNTRY' ];
+				$cfCountry = CCBC_DP::FetchServer( 'HTTP_CF_IPCOUNTRY', null, 'sanitize_key' );
+				if ( preg_match( $codeRegEx, $cfCountry ) ) {
+					$code = $cfCountry;
 				}
 				else {
 					try {
@@ -289,7 +254,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 			}
 		}
 
-		return empty( $code ) ? 'us' : strtolower( $code );
+		return empty( $code ) ? 'us' : strtolower( sanitize_key( $code ) );
 	}
 
 	/**
@@ -348,7 +313,7 @@ class ICWP_CCBC_Processor_GeoLocation {
 		$pathToDB = path_join( \ICWP_CustomContentByCountry_Plugin::GetInstance()->getRootDir(),
 			'resources/MaxMind/GeoLite2-Country.mmdb' );
 		return ( new RetrieveCountryForVisitor( $pathToDB ) )
-			->lookupIP( $this->loadDataProcessor()->GetVisitorIpAddress() );
+			->lookupIP( $this->DP()->GetVisitorIpAddress() );
 	}
 
 	protected function requireLib() {
@@ -359,8 +324,22 @@ class ICWP_CCBC_Processor_GeoLocation {
 
 	/**
 	 * @return ICWP_CCBC_DataProcessor
+	 * @deprecated 3.2
 	 */
 	public function loadDataProcessor() {
+		if ( method_exists( $this, 'DP' ) ) {
+			return $this->DP();
+		}
+		if ( !class_exists( 'ICWP_CCBC_DataProcessor' ) ) {
+			require_once( __DIR__.'/icwp-data-processor.php' );
+		}
+		return ICWP_CCBC_DataProcessor::GetInstance();
+	}
+
+	/**
+	 * @return ICWP_CCBC_DataProcessor
+	 */
+	public function DP() {
 		if ( !class_exists( 'ICWP_CCBC_DataProcessor' ) ) {
 			require_once( __DIR__.'/icwp-data-processor.php' );
 		}
@@ -407,114 +386,11 @@ class ICWP_CCBC_Processor_GeoLocation {
 		}
 	}
 
-	/** AMAZON **/
-
 	/**
-	 * @param $sAsin
-	 * @return string
-	 */
-	public function buildAffLinkFromAsinOnly( $sAsin ) {
-		// Default country code to US. (amazon.com)
-		return $this->buildAffLinkFromCountryCode( $sAsin, $this->getVisitorCountryCode() );
-	}
-
-	/**
-	 * Given the country code and the product ASIN code, returns an Amazon link.
-	 * If the country code isn't found in the country code mapping, 'global' (amazon.com) is used.
-	 * @param $sAsin
-	 * @param $sCountryCode
-	 * @return string
-	 */
-	public function buildAffLinkFromCountryCode( $sAsin, $sCountryCode ) {
-
-		$sAmazonSiteCode = 'global';    //the default: amazon.com
-		$aAmazonCountryCodeToSiteMap = $this->getAmazonCountryCodeToSiteMap();
-		$aAmazonSitesData = $this->getAmazonSitesData();
-
-		if ( array_key_exists( $sCountryCode, $aAmazonCountryCodeToSiteMap ) ) {
-			//special country code mapping that has been provisioned for. e.g. ie => uk amazon site
-			$sAmazonSiteCode = $aAmazonCountryCodeToSiteMap[ $sCountryCode ];
-		}
-		elseif ( array_key_exists( $sCountryCode, $aAmazonSitesData ) ) {
-			$sAmazonSiteCode = $sCountryCode;
-		}
-
-		return $this->buildAffLinkFromAmazonSite( $sAsin, $sAmazonSiteCode );
-	}
-
-	/**
-	 * Give it an Amazon site (defaults to "global") and an ASIN and it will create it.
-	 * @param string $sAsin
-	 * @param string $sAmazonSite
-	 * @return string
-	 */
-	public function buildAffLinkFromAmazonSite( $sAsin = '', $sAmazonSite = 'global' ) {
-		$aAmazonSitesData = $this->getAmazonSitesData();
-
-		if ( !array_key_exists( $sAmazonSite, $aAmazonSitesData ) ) {
-			$sAmazonSite = 'global';
-		}
-
-		list( $sAmazonDomain, $sAssociateIdTag ) = $aAmazonSitesData[ $sAmazonSite ];
-		$sAssociateIdTag = $this->getOption( $sAssociateIdTag );
-		return $this->buildAffLinkAmazon( $sAsin, $sAmazonDomain, $sAssociateIdTag );
-	}
-
-	/**
-	 * The most basic link builder.
-	 * @param string $sAsin
-	 * @param string $sAmazonDomain
-	 * @param string $sAffIdTag
-	 * @return string
-	 */
-	protected function buildAffLinkAmazon( $sAsin = '', $sAmazonDomain = 'com', $sAffIdTag = '' ) {
-		return sprintf( 'https://www.amazon.%s/dp/%s/?tag=%s&creativeASIN=%s',
-			$sAmazonDomain,
-			$sAsin,
-			$sAffIdTag,
-			$sAsin
-		);
-	}
-
-	/**
-	 * @param string $sHtmlVar
+	 * @param string $htmlVar
 	 * @return bool
 	 */
-	private function getHtmlIsOff( $sHtmlVar = '' ) {
-
-		// Basically the local html directive will always override the plugin global setting
-		if ( !empty( $sHtmlVar ) ) {
-			return ( strtolower( $sHtmlVar ) == 'none' );
-		}
-
-		return $this->fHtmlOffMode;
-	}
-
-	/**
-	 * @return array
-	 */
-	private function getAmazonCountryCodeToSiteMap() {
-		return [
-			//country code	//Amazon site
-			'us' => 'global',    //US is the default
-			'ie' => 'uk',
-		];
-	}
-
-	/**
-	 * @return array
-	 */
-	private function getAmazonSitesData() {
-		return [
-			'global' => [ 'com', 'afftag_amazon_region_us' ],
-			'ca'     => [ 'ca', 'afftag_amazon_region_canada' ],
-			'uk'     => [ 'co.uk', 'afftag_amazon_region_uk' ],
-			'fr'     => [ 'fr', 'afftag_amazon_region_france' ],
-			'de'     => [ 'de', 'afftag_amazon_region_germany' ],
-			'it'     => [ 'it', 'afftag_amazon_region_italy' ],
-			'es'     => [ 'es', 'afftag_amazon_region_spain' ],
-			'jp'     => [ 'co.jp', 'afftag_amazon_region_japan' ],
-			'cn'     => [ 'cn', 'afftag_amazon_region_china' ]
-		];
+	private function getHtmlIsOff( $htmlVar = '' ) {
+		return ( strtolower( $htmlVar ) == 'none' ) || $this->fHtmlOffMode;
 	}
 }

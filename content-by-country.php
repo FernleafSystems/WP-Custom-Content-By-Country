@@ -9,7 +9,7 @@ Author URI: https://icwp.io/da
 */
 
 /**
- * Copyright (c) 2022 AptoWeb <support@getshieldsecurity.com>
+ * Copyright (c) 2023 AptoWeb <support@getshieldsecurity.com>
  * All rights reserved.
  *
  * "Custom Content by Country" is
