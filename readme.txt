@@ -5,20 +5,17 @@ Tags: custom content, location, geolocation
 Requires at least: 3.2.0
 Tested up to: 6.1
 Requires PHP: 5.4
-Stable tag: 3.1.3
+Stable tag: 3.2.0
 
 == Description ==
 
-Custom Content by Country from the team behind [Shield Security](http://icwp.io/kx "Shield Security")
+Custom Content by Country from the team behind [Shield Security](https://icwp.io/kx "Shield Security")
 offers you the option to show/hide content to users based on their location (where provided).
 
 With a simple shortcode you can specify, using a list of country codes whether to
 display or hide a block of text/content.
 
-As of version 2.0 I have included functionality so you can dynamically generate Amazon Associate/Affiliate links based on the
-visitor's country. You simply specify your amazon associate tags and the plugin will do the rest.
-
-To learn how to use the plugin, see the [comprehensive FAQ](http://wordpress.org/extend/plugins/custom-content-by-country/faq/)
+To learn how to use the plugin, see the [comprehensive FAQ](https://wordpress.org/extend/plugins/custom-content-by-country/faq/)
 
 == Frequently Asked Questions ==
 
@@ -87,7 +84,7 @@ If you don't install this data, you cannot use the plugin.
 
 = Where can I find a list of the country codes? =
 
-I believe the country codes are ISO 3166 country codes. You can find a list here: http://en.wikipedia.org/wiki/ISO_3166-1
+I believe the country codes are ISO 3166 country codes. You can find a list here: https://en.wikipedia.org/wiki/ISO_3166-1
 
 = Are the any other shortcodes available in this plugin? =
 
@@ -128,20 +125,26 @@ the W3 Total Cache plugin for more info.
 
 = Do you make any other plugins? =
 
-We created the [Shield Security](http://icwp.io/kx "Shield Security") plugin for people who want better WP Security.
+We created the [Shield Security](https://icwp.io/kx "Shield Security") plugin for people who want better WP Security.
 
-We also created the [Manage Multiple WordPress Site Better Tool: iControlWP](http://icwp.io/60) for people with multiple WordPress sites to manage.
+We also created the [Manage Multiple WordPress Site Better Tool: iControlWP](https://icwp.io/60) for people with multiple WordPress sites to manage.
 
-Yes, we created the only [Twitter Bootstrap WordPress](http://icwp.io/61 "Twitter Bootstrap WordPress Plugin")
+Yes, we created the only [Twitter Bootstrap WordPress](https://icwp.io/61 "Twitter Bootstrap WordPress Plugin")
 plugin with over 122,000 downloads so far.
 
 = What "country code" can I use to test locally if I'm accessing a server on our network? =
 
 If your local network address is defined as "Private" according to the database, the country code to use in this case is: 01
 
-This isn't fully tested and shouldn't be used as-is in production but it seems to hold up.  Feedback welcome.
+This isn't fully tested and shouldn't be used as-is in production, but it seems to hold up.  Feedback welcome.
 
 == Changelog ==
+
+= 3.2.0 =
+*released 30th December 2022*
+
+* .0 UPDATED: Complete gutting and cleaning of the plugin.
+* .0 REMOVED: Completely removed the Amazon Affiliate links functionality.
 
 = 3.1.0 =
 *released 22nd June 2022*
@@ -229,14 +232,14 @@ This isn't fully tested and shouldn't be used as-is in production but it seems t
 
 = 2.15.20140816-4 =
 
-* FIXED:    Manually updated the database data to correctly store ISO Codes for Countries. [ref](http://en.wikipedia.org/wiki/ISO_3166-1)
+* FIXED:    Manually updated the database data to correctly store ISO Codes for Countries. [ref](https://en.wikipedia.org/wiki/ISO_3166-1)
 
 = 2.15.20140816-2 =
 
-* FIXED:    Manual tweak to the ip2nations database to correctly reflect the ISO country code for Sweden [ref](http://wordpress.org/support/topic/what-are-the-country-codes)
+* FIXED:    Manual tweak to the ip2nations database to correctly reflect the ISO country code for Sweden [ref](https://wordpress.org/support/topic/what-are-the-country-codes)
 * CHANGED:  Plugin version now highlights the date of the ip2nations database (YYYYMMDD)
-* ADDED:    Automatic plugin updates for updated ip2nations db, minor releases, bug fixes [as per my own article](http://icwp.io/62)
-* CHANGED:  Plugin refactor to bring it closer in-line with developments made on [Simple Firewall](http://wordpress.org/plugins/wp-simple-firewall/) and [Twitter Bootstrap](http://wordpress.org/plugins/wordpress-bootstrap-css/) plugins
+* ADDED:    Automatic plugin updates for updated ip2nations db, minor releases, bug fixes [as per my own article](https://icwp.io/62)
+* CHANGED:  Plugin refactor to bring it closer in-line with developments made on [Simple Firewall](https://wordpress.org/plugins/wp-simple-firewall/) and [Twitter Bootstrap](https://wordpress.org/plugins/wordpress-bootstrap-css/) plugins
 
 = 2.14 =
 
@@ -282,7 +285,7 @@ This isn't fully tested and shouldn't be used as-is in production but it seems t
 = 2.6 =
 
 * CHANGED: Now to prevent warnings with settings cookies, the cookie setting has been moved higher up in processing before http headers have been set.
-(in response to: http://wordpress.org/support/topic/plugin-custom-content-by-country-from-worpit-warning-cannot-modify-header-information)
+(in response to: https://wordpress.org/support/topic/plugin-custom-content-by-country-from-worpit-warning-cannot-modify-header-information)
 
 = 2.5 =
 
