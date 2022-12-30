@@ -1,21 +1,17 @@
 <?php
 
 function printOptionsPageHeader( $title = '' ) {
-	$sLinkedIcwp = '<a href="http://icwp.io/3a" target="_blank">iControlWP</a>';
 	echo '<div class="page-header">';
-	echo '<h2><a id="pluginlogo_32" class="header-icon32" href="http://icwp.io/2k" target="_blank"></a>';
-	$baseTitle = sprintf( 'Custom Content By Country (from %s)', $sLinkedIcwp );
-	if ( !empty( $title ) ) {
-		echo sprintf( '%s :: %s', $title, $baseTitle );
-	}
-	else {
-		echo $baseTitle;
-	}
+	echo '<h2><a id="pluginlogo_32" class="header-icon32" href="https://icwp.io/2k" target="_blank"></a>';
+
+	$baseTitle = sprintf( 'Custom Content By Country (from %s)', '<a href="https://icwp.io/3a" target="_blank">iControlWP</a>' );
+	echo empty( $title ) ? $baseTitle : sprintf( '%s :: %s', esc_js( $title ), $baseTitle );
+
 	echo '</h2></div>';
 }
 
-function getIsHexColour( $insColour ) {
-	return preg_match( '/^#[a-fA-F0-9]{3,6}$/', $insColour );
+function getIsHexColour( $colour ) {
+	return preg_match( '/^#[a-fA-F0-9]{3,6}$/', $colour );
 }
 
 function printAllPluginOptionsForm( $allOptions, $prefix = '', $optsPerRow = 1 ) {
@@ -29,11 +25,11 @@ function printAllPluginOptionsForm( $allOptions, $prefix = '', $optsPerRow = 1 )
 	//Take each Options Section in turn
 	foreach ( $allOptions as $optSection ) {
 
-		$sRowId = str_replace( ' ', '', $optSection[ 'section_title' ] );
+		$rowID = str_replace( ' ', '', $optSection[ 'section_title' ] );
 		//Print the Section Title
 		echo '
-				<div class="row" id="'.$sRowId.'">
-					<div class="span9" style="margin-left:0px">
+				<div class="row" id="'.$rowID.'">
+					<div class="col-9" style="margin-left:0">
 						<fieldset>
 							<legend>'.$optSection[ 'section_title' ].'</legend>
 		';
@@ -59,7 +55,7 @@ function printAllPluginOptionsForm( $allOptions, $prefix = '', $optsPerRow = 1 )
 				</div> <!-- / options row -->';
 				$rowCount++;
 			}
-		}//foreach option
+		}
 
 		echo '
 					</fieldset>
@@ -74,16 +70,12 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 	list( $optKey, $optSaved, $optDef, $optType, $optName, $optTitle, $optHelp ) = $option;
 
 	if ( $optKey == 'spacer' ) {
-		$sHtml = '
-			<div class="span'.$spanSize.'">
-			</div>
-		';
+		$html = '<div class="col-'.$spanSize.'"></div>';
 	}
 	else {
-
-		$sSpanId = 'span_'.$varPrefix.$optKey;
-		$sHtml = '
-			<div class="span'.$spanSize.'" id="'.$sSpanId.'">
+		$spanId = 'span_'.$varPrefix.$optKey;
+		$html = '
+			<div class="col-'.$spanSize.'" id="'.$spanId.'">
 				<div class="control-group">
 					<label class="control-label" for="'.$varPrefix.$optKey.'">'.$optName.'<br /></label>
 					<div class="controls">
@@ -92,15 +84,15 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 		';
 		$sAdditionalClass = '';
 		$sTextInput = '';
-		$sChecked = '';
+		$checked = '';
 		$sHelpSection = '';
 
 		if ( $optType === 'checkbox' ) {
 
-			$sChecked = ( $optSaved == 'Y' ) ? 'checked="checked"' : '';
+			$checked = ( $optSaved == 'Y' ) ? 'checked="checked"' : '';
 
-			$sHtml .= '
-				<input '.$sChecked.'
+			$html .= '
+				<input '.$checked.'
 						type="checkbox"
 						name="'.$varPrefix.$optKey.'"
 						value="Y"
@@ -112,7 +104,7 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 		}
 		elseif ( $optType === 'text' ) {
 			$sTextInput = esc_attr( $optSaved );
-			$sHtml .= '
+			$html .= '
 				<p>'.$optTitle.'</p>
 				<input type="text"
 						name="'.$varPrefix.$optKey.'"
@@ -127,18 +119,18 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 			$sInputType = array_shift( $optType );
 
 			if ( $sInputType == 'select' ) {
-				$sHtml .= '<p>'.$optTitle.'</p>
+				$html .= '<p>'.$optTitle.'</p>
 				<select id="'.$varPrefix.$optKey.'" name="'.$varPrefix.$optKey.'">';
 			}
 
 			foreach ( $optType as $aInput ) {
 
-				$sHtml .= '
+				$html .= '
 					<option value="'.$aInput[ 0 ].'" id="'.$varPrefix.$optKey.'_'.$aInput[ 0 ].'"'.( ( $optSaved == $aInput[ 0 ] ) ? ' selected="selected"' : '' ).'>'.$aInput[ 1 ].'</option>';
 			}
 
 			if ( $sInputType == 'select' ) {
-				$sHtml .= '
+				$html .= '
 				</select>';
 			}
 
@@ -150,7 +142,7 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 				$optSaved = $optDef;
 			}
 
-			$sHtml .= '<input class="span2'.$sAdditionalClass.'"
+			$html .= '<input class="col-2'.$sAdditionalClass.'"
 						type="text"
 						placeholder="'.esc_attr( $optSaved ).'"
 						name="'.$varPrefix.$optKey.'"
@@ -162,7 +154,7 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 			if ( $optType === 'less_color' ) {
 
 				if ( !getIsHexColour( $optSaved ) ) {
-					$sChecked = ' checked';
+					$checked = ' checked';
 				}
 
 				$sToggleTextInput = '
@@ -170,7 +162,7 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 							  <label>
 								<input type="checkbox"
 									name="hlt_toggle_'.$optKey.'"
-									id="hlt_toggle_'.$optKey.'" '.$sChecked.'
+									id="hlt_toggle_'.$optKey.'" '.$checked.'
 									style="vertical-align: -2px;" /> edit as text
 							  </label>
 							</span>';
@@ -189,16 +181,16 @@ function getPluginOptionSpan( $option, $spanSize, $varPrefix = '' ) {
 			echo 'we should never reach this point';
 		}
 
-		$sHtml .= '
+		$html .= '
 						</label>
 						'.$optHelp.'
 					  </div>
 					</div><!-- controls -->'
-				  .$sHelpSection.'
+				 .$sHelpSection.'
 				</div><!-- control-group -->
 			</div>
 		';
 	}
 
-	return $sHtml;
+	return $html;
 }//getPluginOptionSpan

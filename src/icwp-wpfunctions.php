@@ -4,7 +4,7 @@ if ( class_exists( 'ICWP_WpFunctions_CBC' ) ) {
 	return;
 }
 
-class ICWP_WpFunctions_CBC {
+class CCBC_Functions {
 
 	public static function GetWpOption( $sKey, $mDefault = false ) {
 		return get_option( $sKey, $mDefault );
@@ -21,4 +21,7 @@ class ICWP_WpFunctions_CBC {
 	public static function DeleteWpOption( $sKey ) {
 		return delete_option( $sKey );
 	}
+}
+
+class ICWP_WpFunctions_CBC extends CCBC_Functions {
 }

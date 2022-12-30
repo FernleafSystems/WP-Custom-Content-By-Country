@@ -12,7 +12,6 @@ class RetrieveCountryForVisitor extends Base {
 		if ( !is_file( $this->pathDB ) ) {
 			throw new \Exception( 'Path to DB is invalid' );
 		}
-		$reader = new \GeoIp2\Database\Reader( $this->pathDB );
-		return $reader->country( $ip );
+		return ( new \GeoIp2\Database\Reader( $this->pathDB ) )->country( $ip );
 	}
 }

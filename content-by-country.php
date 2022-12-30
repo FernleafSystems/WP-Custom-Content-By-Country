@@ -3,13 +3,13 @@
 Plugin Name: Custom Content by Country (from Shield Security)
 Plugin URI: https://icwp.io/db
 Description: Tool for displaying/hiding custom content based on visitors country/location.
-Version: 3.1.3
+Version: 3.2.0
 Author: AptoWeb
 Author URI: https://icwp.io/da
 */
 
 /**
- * Copyright (c) 2022 AptoWeb <support@getshieldsecurity.com>
+ * Copyright (c) 2023 AptoWeb <support@getshieldsecurity.com>
  * All rights reserved.
  *
  * "Custom Content by Country" is

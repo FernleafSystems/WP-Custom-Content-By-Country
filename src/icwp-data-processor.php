@@ -4,7 +4,7 @@ if ( class_exists( 'ICWP_CCBC_DataProcessor', false ) ) {
 	return;
 }
 
-class ICWP_CCBC_DataProcessor {
+class CCBC_DP {
 
 	/**
 	 * @var ICWP_CCBC_DataProcessor
@@ -14,7 +14,7 @@ class ICWP_CCBC_DataProcessor {
 	/**
 	 * @var string
 	 */
-	protected static $sIpAddress;
+	protected static $IpAddress;
 
 	/**
 	 * @var integer
@@ -46,7 +46,7 @@ class ICWP_CCBC_DataProcessor {
 	 */
 	public static function GetVisitorIpAddress() {
 
-		if ( empty( self::$sIpAddress ) ) {
+		if ( empty( self::$IpAddress ) ) {
 			$sourceOptions = [
 				'HTTP_CF_CONNECTING_IP',
 				'HTTP_X_FORWARDED_FOR',
@@ -77,14 +77,14 @@ class ICWP_CCBC_DataProcessor {
 						continue;
 					}
 					else {
-						self::$sIpAddress = $ip;
-						return self::$sIpAddress;
+						self::$IpAddress = $ip;
+						return self::$IpAddress;
 					}
 				}
 			}
 		}
 
-		return self::$sIpAddress;
+		return self::$IpAddress;
 	}
 
 	/**
@@ -96,77 +96,67 @@ class ICWP_CCBC_DataProcessor {
 	}
 
 	/**
-	 * @param array  $aArray
-	 * @param string $sKey The array key to fetch
-	 * @param mixed  $mDefault
+	 * @param array      $array
+	 * @param string     $key The array key to fetch
+	 * @param mixed      $default
+	 * @param ?|callable $sanitizeCallback
 	 * @return mixed|null
 	 */
-	public static function ArrayFetch( &$aArray, $sKey, $mDefault = null ) {
-		if ( empty( $aArray ) || !isset( $aArray[ $sKey ] ) ) {
-			return $mDefault;
-		}
-		return $aArray[ $sKey ];
+	public static function ArrayFetch( $array, $key, $default = null, $sanitizeCallback = null ) {
+		$value = ( is_array( $array ) && isset( $array[ $key ] ) ) ? $array[ $key ] : $default;
+		return ( !is_null( $value ) && is_callable( $sanitizeCallback ) ) ? call_user_func( $sanitizeCallback, $value ) : $value;
 	}
 
 	/**
-	 * @param string $sKey The $_COOKIE key
-	 * @param mixed  $mDefault
+	 * @param string $key The $_COOKIE key
+	 * @param mixed  $default
+	 * @param ?|callable $sanitizeCallback
 	 * @return mixed|null
 	 */
-	public static function FetchCookie( $sKey, $mDefault = null ) {
-		return self::ArrayFetch( $_COOKIE, $sKey, $mDefault );
+	public static function FetchCookie( $key, $default = null, $sanitizeCallback = null ) {
+		return self::ArrayFetch( $_COOKIE, $key, $default, $sanitizeCallback );
 	}
 
 	/**
-	 * @param string $sKey
-	 * @param mixed  $mDefault
+	 * @param string $key
+	 * @param mixed  $default
+	 * @param ?|callable $sanitizeCallback
 	 * @return mixed|null
 	 */
-	public static function FetchEnv( $sKey, $mDefault = null ) {
-		return self::ArrayFetch( $_ENV, $sKey, $mDefault );
+	public static function FetchEnv( $key, $default = null, $sanitizeCallback = null ) {
+		return self::ArrayFetch( $_ENV, $key, $default, $sanitizeCallback );
 	}
 
 	/**
-	 * @param string $sKey
-	 * @param mixed  $mDefault
+	 * @param string $key
+	 * @param mixed  $default
+	 * @param ?|callable $sanitizeCallback
 	 * @return mixed|null
 	 */
-	public static function FetchGet( $sKey, $mDefault = null ) {
-		return self::ArrayFetch( $_GET, $sKey, $mDefault );
+	public static function FetchGet( $key, $default = null, $sanitizeCallback = null ) {
+		return self::ArrayFetch( $_GET, $key, $default, $sanitizeCallback );
 	}
 
 	/**
-	 * @param string $sKey The $_POST key
-	 * @param mixed  $mDefault
+	 * @param string $key The $_POST key
+	 * @param mixed  $default
+	 * @param ?|callable $sanitizeCallback
 	 * @return mixed|null
 	 */
-	public static function FetchPost( $sKey, $mDefault = null ) {
-		return self::ArrayFetch( $_POST, $sKey, $mDefault );
+	public static function FetchPost( $key, $default = null, $sanitizeCallback = null ) {
+		return self::ArrayFetch( $_POST, $key, $default, $sanitizeCallback );
 	}
 
 	/**
-	 * @param string $sKey
-	 * @param bool   $bIncludeCookie
-	 * @param mixed  $mDefault
+	 * @param string $key
+	 * @param mixed  $default
 	 * @return mixed|null
 	 */
-	public static function FetchRequest( $sKey, $bIncludeCookie = true, $mDefault = null ) {
-		$mFetchVal = self::FetchPost( $sKey );
-		if ( is_null( $mFetchVal ) ) {
-			$mFetchVal = self::FetchGet( $sKey );
-			if ( is_null( $mFetchVal && $bIncludeCookie ) ) {
-				$mFetchVal = self::FetchCookie( $sKey );
-			}
-		}
-		return is_null( $mFetchVal ) ? $mDefault : $mFetchVal;
+	public static function FetchServer( $key, $default = null, $sanitizeCallback = null ) {
+		return self::ArrayFetch( $_SERVER, $key, $default, $sanitizeCallback );
 	}
+}
 
-	/**
-	 * @param string $sKey
-	 * @param mixed  $mDefault
-	 * @return mixed|null
-	 */
-	public static function FetchServer( $sKey, $mDefault = null ) {
-		return self::ArrayFetch( $_SERVER, $sKey, $mDefault );
-	}
+class ICWP_CCBC_DataProcessor extends CCBC_DP {
+
 }

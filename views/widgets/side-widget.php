@@ -38,9 +38,9 @@
 		</style>
 <div id="side_widgets">
 <div class="well" id="side_widget_worpit">
-<a href="http://icwp.io/4d" target="_blank">
+<a href="https://icwp.io/4d" target="_blank">
 	<img id="widget_worpit_link"
-	     src="https://www.icontrolwp.com/custom/remote/plugins/resources/images/worpdrive-plugin-logo.png"
+	     src="<?php echo $worpit_worpdrive_logo_url; ?>"
 	     width="200px" height="200px" /></a>
 <h3>WordPress Backup &raquo;
 <small><br />that just <u>always works</u> ..so you don't have to!</small></h3>
@@ -48,14 +48,14 @@
 <li>Daily</li>
 <li>Automatic</li>
 <li>Free Test Restore Sites</li>
-<li><a href="http://icwp.io/4b" target="_blank">iControlWP included</a>!</li>
+<li><a href="https://icwp.io/4b" target="_blank">iControlWP included</a>!</li>
 <li>14GB Free Storage</li>
 <li>Change logs</li>
 <li>Secure FTP</li>
 <li>No PHP/Memory Errors</li>
 <li>Unlimited Site Sizes</li>
 </ul>
-<p style="text-align: center;"><a href="http://icwp.io/4c" target="_blank">more info &rarr;</a></p>
+<p style="text-align: center;"><a href="https://icwp.io/4c" target="_blank">more info &rarr;</a></p>
 </div>
 
 </div>
