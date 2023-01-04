@@ -29,6 +29,6 @@
   // Compile the template data into a function
   let templateScript = Handlebars.compile( jQuery( '#ccbc-<?php echo esc_html( $ccbc_slug ); ?>' ).html() );
   jQuery( '#ccbc-output-body' ).html(
-	  templateScript( <?php echo $ccbc_context ?> )
+	  templateScript( <?php echo $ccbc_context ?> ) /** JSON-encoded OBJECT **/
   );
 </script>
