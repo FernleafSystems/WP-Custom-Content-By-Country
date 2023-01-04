@@ -1,1 +1,8 @@
 .idea/
+vendor/composer/ca-bundle
+vendor/geoip2/geoip2/*
+!vendor/geoip2/geoip2/src/
+vendor/maxmind/web-service-common/*
+!vendor/maxmind/web-service-common/src
+vendor/maxmind-db/reader/*
+!vendor/maxmind-db/reader/src

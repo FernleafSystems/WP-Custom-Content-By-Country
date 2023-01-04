@@ -25,6 +25,7 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	}
 
 	public function onWpLoaded() {
+		parent::onWpLoaded();
 		if ( $this->getOption( 'enable_content_by_country' ) === 'Y' ) {
 			$this->loadGeoLocationProcessor()->initShortCodes();
 		}
@@ -62,31 +63,31 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 			'section_title'   => 'Enable Content By Country Plugin Options',
 			'section_options' => [
 				[
-					'enable_content_by_country',
-					'',
-					'N',
-					'checkbox',
-					'Content By Country',
-					'Enable Content by Country Feature',
-					"Provides the shortcodes for showing/hiding content based on visitor's location."
+					'slug'        => 'enable_content_by_country',
+					'value'       => '',
+					'default'     => 'N',
+					'type'        => 'checkbox',
+					'name'        => 'Content By Country',
+					'summary'     => 'Enable Content by Country Feature',
+					'description' => "Provides the shortcodes for showing/hiding content based on visitor's location."
 				],
 				[
-					'enable_html_off_mode',
-					'',
-					'N',
-					'checkbox',
-					'HTML Off',
-					'HTML Off mode turns off HTML printing by default',
-					"When enabled, the HTML that is normally output is disabled.  Normally the output is surrounded by html SPAN tags, but these are then removed."
+					'slug'        => 'enable_html_off_mode',
+					'value'       => '',
+					'default'     => 'N',
+					'type'        => 'checkbox',
+					'name'        => 'HTML Off',
+					'summary'     => 'HTML Off mode turns off HTML printing by default',
+					'description' => "When enabled, the HTML that is normally output is disabled.  Normally the output is surrounded by html SPAN tags, but these are then removed."
 				],
 				[
-					'enable_w3tc_compatibility_mode',
-					'',
-					'N',
-					'checkbox',
-					'W3TC Compatibility Mode',
-					'Turns off page caching for shortcodes',
-					"When enabled, 'Custom Content by Country' plugin will turn off page caching for pages that use these shortcodes."
+					'slug'        => 'enable_w3tc_compatibility_mode',
+					'value'       => '',
+					'default'     => 'N',
+					'type'        => 'checkbox',
+					'name'        => 'W3TC Compatibility Mode',
+					'summary'     => 'Turns off page caching for shortcodes',
+					'description' => "When enabled, 'Custom Content by Country' plugin will turn off page caching for pages that use these shortcodes."
 				],
 			]
 		];
@@ -126,7 +127,9 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 			'all_options_input' => implode( ',', array_map(
 				function ( $optionSection ) {
 					return $this->collateAllFormInputsForOptionsSection( $optionSection, ',' );
-				}, $this->getAllPluginOptions() ) ),
+				},
+				$this->getAllPluginOptions()
+			) ),
 			'form_action'       => 'admin.php?page='.$this->getFullParentMenuId().'-main',
 			'form_nonce'        => wp_nonce_field( $this->oPluginVo->getOptionStoragePrefix( 'main_submit' ), '_wpnonce', true, false ),
 		] ) );

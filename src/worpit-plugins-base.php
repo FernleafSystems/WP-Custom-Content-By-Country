@@ -47,7 +47,6 @@ class ICWP_Plugins_Base_CBC {
 			add_action( 'admin_menu', [ $this, 'onWpAdminMenu' ] );
 			add_action( 'plugin_action_links', [ $this, 'onWpPluginActionLinks' ], 10, 4 );
 		}
-		add_filter( 'auto_update_plugin', [ $this, 'onWpAutoUpdatePlugin' ], 1000, 2 );
 		/**
 		 * We make the assumption that all settings updates are successful until told otherwise
 		 * by an actual failing update_option call.
@@ -76,27 +75,6 @@ class ICWP_Plugins_Base_CBC {
 	 */
 	public function getPluginPrefix( $glue = '-' ) {
 		return $this->oPluginVo->getFullPluginPrefix( $glue );
-	}
-
-	/**
-	 * @param bool    $doUpdate
-	 * @param         $pluginInfo
-	 * @return bool
-	 */
-	public function onWpAutoUpdatePlugin( $doUpdate, $pluginInfo ) {
-
-		// Only supports WordPress 3.8.2+
-		if ( !is_object( $pluginInfo ) || !isset( $pluginInfo->new_version ) || !isset( $pluginInfo->plugin ) ) {
-			return $doUpdate;
-		}
-
-		if ( $pluginInfo->plugin === $this->getPluginBaseFile() ) {
-			$aCurrentParts = explode( '-', $this->oPluginVo->getVersion(), 2 );
-			$aUpdateParts = explode( '-', $pluginInfo->new_version, 2 );
-			// We only return true (i.e. update if and when the update is a minor version
-			return ( $aUpdateParts[ 0 ] === $aCurrentParts[ 0 ] );
-		}
-		return $doUpdate;
 	}
 
 	protected function getFullParentMenuId() {
@@ -336,8 +314,7 @@ class ICWP_Plugins_Base_CBC {
 	protected function collateAllFormInputsForOptionsSection( $optSection ) {
 		return implode( ',', array_map(
 			function ( $option ) {
-				list( $key, $fill1, $fill2, $type ) = $option;
-				return sprintf( '%s:%s', $type, $key );
+				return sprintf( '%s:%s', $option[ 'type' ], $option[ 'slug' ] );
 			},
 			empty( $optSection[ 'section_options' ] ) ? [] : $optSection[ 'section_options' ]
 		) );
@@ -352,9 +329,9 @@ class ICWP_Plugins_Base_CBC {
 	protected function deleteAllPluginDbOptions() {
 		if ( current_user_can( 'manage_options' ) ) {
 			foreach ( $this->getAllPluginOptions() as $optionsSection ) {
-				foreach ( $optionsSection[ 'section_options' ] as $param ) {
-					if ( isset( $param[ 0 ] ) ) {
-						$this->deleteOption( $param[ 0 ] );
+				foreach ( $optionsSection[ 'section_options' ] as $option ) {
+					if ( !empty( $option[ 'slug' ] ) ) {
+						$this->deleteOption( $option[ 'slug' ] );
 					}
 				}
 			}
@@ -374,9 +351,8 @@ class ICWP_Plugins_Base_CBC {
 
 			foreach ( $this->allPluginOptions as &$section ) {
 				foreach ( $section[ 'section_options' ] as &$optionParam ) {
-					list( $optionKey, $current, $default ) = $optionParam;
-					$currentOptVal = $this->getOption( $optionKey );
-					$optionParam[ 1 ] = is_null( $currentOptVal ) ? $default : $currentOptVal;
+					$currentOptVal = $this->getOption( $optionParam[ 'slug' ] );
+					$optionParam[ 'value' ] = is_null( $currentOptVal ) ? $optionParam[ 'default' ] : $currentOptVal;
 				}
 			}
 		}
@@ -390,8 +366,8 @@ class ICWP_Plugins_Base_CBC {
 		$keys = [];
 		foreach ( $this->getAllPluginOptions() as $optionsSection ) {
 			foreach ( $optionsSection[ 'section_options' ] as $param ) {
-				if ( isset( $param[ 0 ] ) ) {
-					$keys[] = $param[ 0 ];
+				if ( !empty( $option[ 'slug' ] ) ) {
+					$keys[] = $option[ 'slug' ];
 				}
 			}
 		}
