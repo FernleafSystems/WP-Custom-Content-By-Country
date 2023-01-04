@@ -81,6 +81,25 @@ class ICWP_Plugins_Base_CBC {
 		return self::ParentMenuId.'-'.$this->oPluginVo->getPluginSlug();
 	}
 
+	protected function renderHB( $slug, array $data = [] ) {
+		$file = sprintf( '%s%s.handlebars', $this->oPluginVo->getHandleBarTemplateDir(), $slug );
+		if ( !is_file( $file ) ) {
+			return 'View slug not found: '.esc_html( $file );
+		}
+
+		ob_start();
+		extract(
+			[
+				'slug'    => $slug,
+				'context' => wp_json_encode( array_merge( $this->getCommonDisplayVars(), $data ) ),
+			],
+			EXTR_PREFIX_ALL,
+			'ccbc'
+		);
+		include( $this->oPluginVo->getViewDir().'handlebars_render.php' );
+		return ob_get_clean();
+	}
+
 	protected function display( $view, $data = [] ) {
 		$file = $this->oPluginVo->getViewDir().$view.'.php';
 
@@ -137,8 +156,8 @@ class ICWP_Plugins_Base_CBC {
 
 	public function onWpAdminInit() {
 		if ( $this->isWorpitPluginAdminPage() ) {
-			$this->enqueueBootstrapAdminCss();
 			$this->enqueuePluginAdminCss();
+			$this->enqueuePluginAdminJS();
 		}
 	}
 
@@ -187,14 +206,22 @@ class ICWP_Plugins_Base_CBC {
 	 * The callback function for the main admin menu index page
 	 */
 	public function onDisplayMainMenu() {
-		$this->display( 'worpit_'.$this->oPluginVo->getPluginSlug().'_index', $this->getCommonDisplayVars() );
+		echo $this->renderHB( 'index', [
+			'strings' => [
+				'page_title' => 'Dashboard'
+			]
+		] );
 	}
 
 	protected function getCommonDisplayVars() {
 		return [
-			'plugin_url'         => $this->sPluginUrl,
-			'icwp_logo_url'      => $this->sPluginUrl.'resources/images/icwp_logo-250.png',
-			'worpdrive_logo_url' => $this->sPluginUrl.'resources/images/worpdrive-plugin-logo.png',
+			'hrefs' => [
+				'page_main' => 'admin.php?page='.$this->getSubmenuId( 'main' ),
+			],
+			'imgs'  => [
+				'icwp_logo_url'      => $this->sPluginUrl.'resources/images/icwp_logo-250.png',
+				'worpdrive_logo_url' => $this->sPluginUrl.'resources/images/worpdrive-plugin-logo.png',
+			],
 		];
 	}
 
@@ -228,15 +255,26 @@ class ICWP_Plugins_Base_CBC {
 	protected function handlePluginFormSubmit() {
 	}
 
-	protected function enqueueBootstrapAdminCss() {
-		wp_register_style( 'worpit_bootstrap_wpadmin_css', $this->getCssUrl( 'bootstrap.min.css' ), false, $this->oPluginVo->getVersion() );
-		wp_enqueue_style( 'worpit_bootstrap_wpadmin_css' );
+	protected function enqueuePluginAdminJS() {
+		wp_enqueue_script(
+			'ccbc_handlebars',
+			$this->getJsUrl( 'handlebars.min.js' ),
+			[ 'jquery' ],
+			sprintf( '%s-%s', $this->oPluginVo->getVersion(), rand( 1000, 9999 ) )
+		);
 	}
 
 	protected function enqueuePluginAdminCss() {
-		$rand = rand();
-		wp_register_style( 'icwp_plugin_css'.$rand, $this->getCssUrl( 'plugin.css' ), false, $this->oPluginVo->getVersion() );
-		wp_enqueue_style( 'icwp_plugin_css'.$rand );
+		wp_enqueue_style( 'worpit_bootstrap_wpadmin_css',
+			$this->getCssUrl( 'bootstrap.min.css' ),
+			[],
+			sprintf( '%s-%s', $this->oPluginVo->getVersion(), rand( 1000, 9999 ) )
+		);
+		wp_enqueue_style( 'icwp_plugin_css',
+			$this->getCssUrl( 'plugin.css' ),
+			[ 'worpit_bootstrap_wpadmin_css' ],
+			sprintf( '%s-%s', $this->oPluginVo->getVersion(), rand( 1000, 9999 ) )
+		);
 	}
 
 	/**
@@ -365,7 +403,7 @@ class ICWP_Plugins_Base_CBC {
 	protected function getAllPluginOptionKeys() {
 		$keys = [];
 		foreach ( $this->getAllPluginOptions() as $optionsSection ) {
-			foreach ( $optionsSection[ 'section_options' ] as $param ) {
+			foreach ( $optionsSection[ 'section_options' ] as $option ) {
 				if ( !empty( $option[ 'slug' ] ) ) {
 					$keys[] = $option[ 'slug' ];
 				}

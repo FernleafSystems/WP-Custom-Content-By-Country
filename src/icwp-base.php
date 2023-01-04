@@ -12,37 +12,37 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	/**
 	 * @var string
 	 */
-	protected static $fLoggingEnabled;
+	protected static $LoggingEnabled;
 
 	/**
 	 * @var string
 	 */
-	protected static $sParentSlug = 'icwp';
+	protected static $ParentSlug = 'icwp';
 
 	/**
 	 * @var string
 	 */
-	protected static $sPluginSlug;
+	protected static $PluginSlug;
 
 	/**
 	 * @var string
 	 */
-	protected static $sVersion;
+	protected static $Version;
 
 	/**
 	 * @var string
 	 */
-	protected static $sHumanName;
+	protected static $HumanName;
 
 	/**
 	 * @var string
 	 */
-	protected static $sMenuTitleName;
+	protected static $MenuTitle;
 
 	/**
 	 * @var string
 	 */
-	protected static $sTextDomain;
+	protected static $TextDomain;
 
 	/**
 	 * @var string
@@ -73,7 +73,7 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getAdminMenuTitle() {
-		return self::$sMenuTitleName;
+		return self::$MenuTitle;
 	}
 
 	/**
@@ -88,7 +88,7 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getFullPluginPrefix( $glue = '-' ) {
-		return sprintf( '%s%s%s', self::$sParentSlug, $glue, self::$sPluginSlug );
+		return sprintf( '%s%s%s', self::$ParentSlug, $glue, self::$PluginSlug );
 	}
 
 	/**
@@ -111,14 +111,14 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getHumanName() {
-		return self::$sHumanName;
+		return self::$HumanName;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getIsLoggingEnabled() {
-		return self::$fLoggingEnabled;
+		return self::$LoggingEnabled;
 	}
 
 	/**
@@ -132,14 +132,14 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public function getParentSlug() {
-		return self::$sParentSlug;
+		return self::$ParentSlug;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getPluginSlug() {
-		return self::$sPluginSlug;
+		return self::$PluginSlug;
 	}
 
 	/**
@@ -171,14 +171,14 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 * @return string
 	 */
 	public static function GetTextDomain() {
-		return self::$sTextDomain;
+		return self::$TextDomain;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getVersion() {
-		return self::$sVersion;
+		return self::$Version;
 	}
 
 	/**
@@ -188,5 +188,13 @@ abstract class ICWP_CCBC_Wordpress_Plugin_V1 {
 	 */
 	public function getViewDir() {
 		return trailingslashit( path_join( $this->getRootDir(), self::ViewDir ) );
+	}
+
+	/**
+	 * get the directory for the plugin view with the trailing slash
+	 * @return string
+	 */
+	public function getHandleBarTemplateDir() {
+		return trailingslashit( path_join( $this->getRootDir(), self::ViewDir.'/hb' ) );
 	}
 }

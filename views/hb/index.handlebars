@@ -1,15 +1,11 @@
-<?php
-include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
-?>
-
 <div class="wrap">
 	<div class="bootstrap-wpadmin">
 
-		<?php printOptionsPageHeader( 'Dashboard' ); ?>
+	  {{> ccbc-page_header }}
 
 		<div class="row">
 			<div class="col-12">
-				<div class="alert alert-error">
+				<div class="alert alert-warning">
 					<h4 class="alert-heading">Important Notice</h4>
 					You need to go to the <a href="admin.php?page=<?php echo $this->getSubmenuId( 'main' ) ?>">
 						main plugin Settings page</a> to enable the plugin features.</div>
@@ -49,11 +45,10 @@ include_once( dirname( __FILE__ ).'/worpit_options_helper.php' );
 		</div>
 
 		<div class="row mt-5" id="worpit_promo">
-		  <div class="col-12">
-        <?php include( __DIR__.'/widgets/horiz-widget.php' ); ?>
+		  <div class="col">
+				{{> ccbc-horizbar }}
 		  </div>
 		</div>
 
-	</div><!-- / bootstrap-wpadmin -->
-
-</div><!-- / wrap -->
+	</div>
+</div>

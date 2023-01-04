@@ -57,13 +57,13 @@ class ICWP_CustomContentByCountry_Plugin extends ICWP_CCBC_Wordpress_Plugin_V1 {
 			'css',
 			'less'
 		];
-		self::$sParentSlug = 'worpit';
-		self::$sVersion = '3.1.3';
-		self::$sPluginSlug = 'cbc';
-		self::$sHumanName = 'Custom Content By Country';
-		self::$sMenuTitleName = 'Content By Country';
-		self::$sTextDomain = 'custom-content-by-country';
-		self::$fLoggingEnabled = false;
+		self::$ParentSlug = 'worpit';
+		self::$Version = '3.1.3';
+		self::$PluginSlug = 'cbc';
+		self::$HumanName = 'Custom Content By Country';
+		self::$MenuTitle = 'Content By Country';
+		self::$TextDomain = 'custom-content-by-country';
+		self::$LoggingEnabled = false;
 	}
 }
 

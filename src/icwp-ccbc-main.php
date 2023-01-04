@@ -120,8 +120,7 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 	}
 
 	public function onDisplayCbcMain() {
-		$this->display( 'worpit_cbc_main', array_merge( $this->getCommonDisplayVars(), [
-			'plugin_url'        => $this->sPluginUrl,
+		echo $this->renderHB( 'main', [
 			'var_prefix'        => $this->oPluginVo->getOptionStoragePrefix(),
 			'allOptions'        => $this->getAllPluginOptions(),
 			'all_options_input' => implode( ',', array_map(
@@ -132,7 +131,10 @@ class ICWP_CustomContentByCountry extends ICWP_Plugins_Base_CBC {
 			) ),
 			'form_action'       => 'admin.php?page='.$this->getFullParentMenuId().'-main',
 			'form_nonce'        => wp_nonce_field( $this->oPluginVo->getOptionStoragePrefix( 'main_submit' ), '_wpnonce', true, false ),
-		] ) );
+			'strings'           => [
+				'page_title' => 'Main Options'
+			]
+		] );
 	}
 
 	private function adminNoticeOptionsUpdated() {
