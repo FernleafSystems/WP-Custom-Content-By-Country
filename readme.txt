@@ -140,11 +140,13 @@ This isn't fully tested and shouldn't be used as-is in production, but it seems 
 
 == Changelog ==
 
-= 3.2.0 =
-*released 30th December 2022*
+= 3.2.1 =
+*released 4th January 2023*
 
-* .0 UPDATED: Complete gutting and cleaning of the plugin.
-* .0 REMOVED: Completely removed the Amazon Affiliate links functionality.
+* .1 UPDATED: Use Handlebars JS to render templates.
+* .1 UPDATED: Gut and clean plugin.
+* .1 UPDATED: GeoIP DB.
+* .1 REMOVED: Completely removed the Amazon Affiliate links functionality.
 
 = 3.1.0 =
 *released 22nd June 2022*

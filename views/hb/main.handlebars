@@ -1,0 +1,97 @@
+<div class="wrap">
+	<div class="bootstrap-wpadmin">
+
+	  {{> ccbc-page_header }}
+
+		<div class="row">
+			<div class="col-8">
+				<form method="post" action="{{{ form_action }}}" class="form-horizontal">
+					{{#each allOptions}}
+						<fieldset>
+							<legend>{{section_title}}</legend>
+						</fieldset>
+
+						{{#each section_options}}
+							<div class="row mb-3">
+								<div class="col-12">
+									<label class="form-label" for="{{strConcat ../../var_prefix slug}}">{{name}}</label>
+									<div class="controls">
+										<div class="option_section" id="option_section_{{strConcat ../../var_prefix slug}}">
+											<label>
+												<input
+														name="{{strConcat ../../var_prefix slug}}"
+														id="{{strConcat ../../var_prefix slug}}"
+													{{#ifEquals type "checkbox"}}
+														class="form-check-input"
+														type="checkbox"
+														value="Y"
+
+														{{#ifEquals value "Y"}}
+															checked="checked"
+														{{/ifEquals}}
+
+													{{/ifEquals}}
+												/>
+												<span class="option_summary">{{ summary }}</span>
+											</label>
+											<p class="help-block">{{ description }}</p>
+										</div>
+									</div>
+								</div>
+							</div>
+						{{/each}}
+					{{/each}}
+
+					<div class="form-actions">
+						<input type="hidden"
+						       name="{{ var_prefix }}all_options_input"
+						       value="{{ all_options_input }}" />
+						{{{ form_nonce }}}
+						<button type="submit" class="btn btn-primary" name="submit">Save All Settings</button>
+					</div>
+				</form>
+			</div>
+			<div class="col-3 offset-1" id="side_widgets">
+				{{> ccbc-sidebar}}
+			</div>
+		</div>
+
+		<div class="row mt-5" id="worpit_promo">
+		  <div class="col">
+			  {{> ccbc-horizbar }}
+		  </div>
+		</div>
+
+	</div>
+</div>
+
+
+<script type="text/javascript">
+	jQuery( document ).ready(
+			function () {
+
+				/**
+				 * Initialise the default states of sections and inputs.
+				 */
+				jQuery( 'input:checked' ).parents( 'div.option_section' ).addClass( 'active' );
+
+				/**
+				 * When a checkbox, or associated label is clicked, the parent "section" style is updated.
+				 */
+				jQuery( '.option_section input[type=checkbox],.option_section label' ).on( 'click',
+						function ( evt ) {
+							let $this = jQuery( this );
+							let parent = $this.parents( 'div.option_section' );
+
+							let input = jQuery( 'input[type=checkbox]', parent );
+							if ( input.is( ':checked' ) ) {
+								parent.addClass( 'active' );
+							}
+							else {
+								parent.removeClass( 'active' );
+							}
+						}
+				);
+			}
+	);
+</script>

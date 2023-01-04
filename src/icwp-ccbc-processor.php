@@ -29,9 +29,6 @@ class ICWP_CCBC_Processor_GeoLocation {
 	 */
 	protected $sWpOptionPrefix = '';
 
-	public function __construct() {
-	}
-
 	/**
 	 * @var ICWP_CCBC_Processor_GeoLocation
 	 */
@@ -75,7 +72,6 @@ class ICWP_CCBC_Processor_GeoLocation {
 	}
 
 	public function initShortCodes() {
-
 		if ( function_exists( 'add_shortcode' ) ) {
 			foreach (
 				[

@@ -47,7 +47,6 @@ class ICWP_Plugins_Base_CBC {
 			add_action( 'admin_menu', [ $this, 'onWpAdminMenu' ] );
 			add_action( 'plugin_action_links', [ $this, 'onWpPluginActionLinks' ], 10, 4 );
 		}
-		add_filter( 'auto_update_plugin', [ $this, 'onWpAutoUpdatePlugin' ], 1000, 2 );
 		/**
 		 * We make the assumption that all settings updates are successful until told otherwise
 		 * by an actual failing update_option call.
@@ -78,29 +77,27 @@ class ICWP_Plugins_Base_CBC {
 		return $this->oPluginVo->getFullPluginPrefix( $glue );
 	}
 
-	/**
-	 * @param bool    $doUpdate
-	 * @param         $pluginInfo
-	 * @return bool
-	 */
-	public function onWpAutoUpdatePlugin( $doUpdate, $pluginInfo ) {
-
-		// Only supports WordPress 3.8.2+
-		if ( !is_object( $pluginInfo ) || !isset( $pluginInfo->new_version ) || !isset( $pluginInfo->plugin ) ) {
-			return $doUpdate;
-		}
-
-		if ( $pluginInfo->plugin === $this->getPluginBaseFile() ) {
-			$aCurrentParts = explode( '-', $this->oPluginVo->getVersion(), 2 );
-			$aUpdateParts = explode( '-', $pluginInfo->new_version, 2 );
-			// We only return true (i.e. update if and when the update is a minor version
-			return ( $aUpdateParts[ 0 ] === $aCurrentParts[ 0 ] );
-		}
-		return $doUpdate;
-	}
-
 	protected function getFullParentMenuId() {
 		return self::ParentMenuId.'-'.$this->oPluginVo->getPluginSlug();
+	}
+
+	protected function renderHB( $slug, array $data = [] ) {
+		$file = sprintf( '%s%s.handlebars', $this->oPluginVo->getHandleBarTemplateDir(), $slug );
+		if ( !is_file( $file ) ) {
+			return 'View slug not found: '.esc_html( $file );
+		}
+
+		ob_start();
+		extract(
+			[
+				'slug'    => $slug,
+				'context' => wp_json_encode( array_merge( $this->getCommonDisplayVars(), $data ) ),
+			],
+			EXTR_PREFIX_ALL,
+			'ccbc'
+		);
+		include( $this->oPluginVo->getViewDir().'handlebars_render.php' );
+		return ob_get_clean();
 	}
 
 	protected function display( $view, $data = [] ) {
@@ -159,8 +156,8 @@ class ICWP_Plugins_Base_CBC {
 
 	public function onWpAdminInit() {
 		if ( $this->isWorpitPluginAdminPage() ) {
-			$this->enqueueBootstrapAdminCss();
 			$this->enqueuePluginAdminCss();
+			$this->enqueuePluginAdminJS();
 		}
 	}
 
@@ -209,14 +206,22 @@ class ICWP_Plugins_Base_CBC {
 	 * The callback function for the main admin menu index page
 	 */
 	public function onDisplayMainMenu() {
-		$this->display( 'worpit_'.$this->oPluginVo->getPluginSlug().'_index', $this->getCommonDisplayVars() );
+		echo $this->renderHB( 'index', [
+			'strings' => [
+				'page_title' => 'Dashboard'
+			]
+		] );
 	}
 
 	protected function getCommonDisplayVars() {
 		return [
-			'plugin_url'         => $this->sPluginUrl,
-			'icwp_logo_url'      => $this->sPluginUrl.'resources/images/icwp_logo-250.png',
-			'worpdrive_logo_url' => $this->sPluginUrl.'resources/images/worpdrive-plugin-logo.png',
+			'hrefs' => [
+				'page_main' => 'admin.php?page='.$this->getSubmenuId( 'main' ),
+			],
+			'imgs'  => [
+				'icwp_logo_url'      => $this->sPluginUrl.'resources/images/icwp_logo-250.png',
+				'worpdrive_logo_url' => $this->sPluginUrl.'resources/images/worpdrive-plugin-logo.png',
+			],
 		];
 	}
 
@@ -250,15 +255,26 @@ class ICWP_Plugins_Base_CBC {
 	protected function handlePluginFormSubmit() {
 	}
 
-	protected function enqueueBootstrapAdminCss() {
-		wp_register_style( 'worpit_bootstrap_wpadmin_css', $this->getCssUrl( 'bootstrap.min.css' ), false, $this->oPluginVo->getVersion() );
-		wp_enqueue_style( 'worpit_bootstrap_wpadmin_css' );
+	protected function enqueuePluginAdminJS() {
+		wp_enqueue_script(
+			'ccbc_handlebars',
+			$this->getJsUrl( 'handlebars.min.js' ),
+			[ 'jquery' ],
+			sprintf( '%s-%s', $this->oPluginVo->getVersion(), rand( 1000, 9999 ) )
+		);
 	}
 
 	protected function enqueuePluginAdminCss() {
-		$rand = rand();
-		wp_register_style( 'icwp_plugin_css'.$rand, $this->getCssUrl( 'plugin.css' ), false, $this->oPluginVo->getVersion() );
-		wp_enqueue_style( 'icwp_plugin_css'.$rand );
+		wp_enqueue_style( 'worpit_bootstrap_wpadmin_css',
+			$this->getCssUrl( 'bootstrap.min.css' ),
+			[],
+			sprintf( '%s-%s', $this->oPluginVo->getVersion(), rand( 1000, 9999 ) )
+		);
+		wp_enqueue_style( 'icwp_plugin_css',
+			$this->getCssUrl( 'plugin.css' ),
+			[ 'worpit_bootstrap_wpadmin_css' ],
+			sprintf( '%s-%s', $this->oPluginVo->getVersion(), rand( 1000, 9999 ) )
+		);
 	}
 
 	/**
@@ -336,8 +352,7 @@ class ICWP_Plugins_Base_CBC {
 	protected function collateAllFormInputsForOptionsSection( $optSection ) {
 		return implode( ',', array_map(
 			function ( $option ) {
-				list( $key, $fill1, $fill2, $type ) = $option;
-				return sprintf( '%s:%s', $type, $key );
+				return sprintf( '%s:%s', $option[ 'type' ], $option[ 'slug' ] );
 			},
 			empty( $optSection[ 'section_options' ] ) ? [] : $optSection[ 'section_options' ]
 		) );
@@ -352,9 +367,9 @@ class ICWP_Plugins_Base_CBC {
 	protected function deleteAllPluginDbOptions() {
 		if ( current_user_can( 'manage_options' ) ) {
 			foreach ( $this->getAllPluginOptions() as $optionsSection ) {
-				foreach ( $optionsSection[ 'section_options' ] as $param ) {
-					if ( isset( $param[ 0 ] ) ) {
-						$this->deleteOption( $param[ 0 ] );
+				foreach ( $optionsSection[ 'section_options' ] as $option ) {
+					if ( !empty( $option[ 'slug' ] ) ) {
+						$this->deleteOption( $option[ 'slug' ] );
 					}
 				}
 			}
@@ -374,9 +389,8 @@ class ICWP_Plugins_Base_CBC {
 
 			foreach ( $this->allPluginOptions as &$section ) {
 				foreach ( $section[ 'section_options' ] as &$optionParam ) {
-					list( $optionKey, $current, $default ) = $optionParam;
-					$currentOptVal = $this->getOption( $optionKey );
-					$optionParam[ 1 ] = is_null( $currentOptVal ) ? $default : $currentOptVal;
+					$currentOptVal = $this->getOption( $optionParam[ 'slug' ] );
+					$optionParam[ 'value' ] = is_null( $currentOptVal ) ? $optionParam[ 'default' ] : $currentOptVal;
 				}
 			}
 		}
@@ -389,9 +403,9 @@ class ICWP_Plugins_Base_CBC {
 	protected function getAllPluginOptionKeys() {
 		$keys = [];
 		foreach ( $this->getAllPluginOptions() as $optionsSection ) {
-			foreach ( $optionsSection[ 'section_options' ] as $param ) {
-				if ( isset( $param[ 0 ] ) ) {
-					$keys[] = $param[ 0 ];
+			foreach ( $optionsSection[ 'section_options' ] as $option ) {
+				if ( !empty( $option[ 'slug' ] ) ) {
+					$keys[] = $option[ 'slug' ];
 				}
 			}
 		}
